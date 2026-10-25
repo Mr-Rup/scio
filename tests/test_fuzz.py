@@ -8,7 +8,7 @@ import numpy as np
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from pyscio.core.errors import MissingDataError
+from pyscio.core.errors import MissingDataError, ZeroVarError
 from pyscio.core.guards import EPSILON, clamp_p, clean_1d
 from pyscio.functional.adjust import fdr_bh
 from pyscio.functional.effects import cliffs_d
@@ -85,13 +85,12 @@ def test_fdr_bh_invariants(p_vals: list[float]) -> None:
 )
 @settings(max_examples=40)
 def test_cliffs_d_invariants(g1: list[float], g2: list[float]) -> None:
-    # Skip if variance is 0
-    if len(set(g1)) <= 1 or len(set(g2)) <= 1:
-        return
-
-    delta = cliffs_d(g1, g2)
-    assert -1.0 <= delta <= 1.0
-    assert not math.isnan(delta)
+    try:
+        delta = cliffs_d(g1, g2)
+        assert -1.0 <= delta <= 1.0
+        assert not math.isnan(delta)
+    except ZeroVarError:
+        pass
 
 
 @given(
@@ -100,10 +99,10 @@ def test_cliffs_d_invariants(g1: list[float], g2: list[float]) -> None:
 )
 @settings(max_examples=30)
 def test_compare_fuzz_two_sample(g1: list[float], g2: list[float]) -> None:
-    if len(set(g1)) <= 1 or len(set(g2)) <= 1:
-        return
-
-    res = compare(g1, g2)
-    assert res.stat is not None
-    assert 0.0 <= res.p <= 1.0
-    assert res.sig == (res.p < 0.05)
+    try:
+        res = compare(g1, g2)
+        assert res.stat is not None
+        assert 0.0 <= res.p <= 1.0
+        assert res.sig == (res.p < 0.05)
+    except ZeroVarError:
+        pass
