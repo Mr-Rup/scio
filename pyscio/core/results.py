@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -363,6 +364,11 @@ class EDAReport(BaseResult):
             badge=(f"Health: {self.health_score:.0f}%", badge_color),
             warnings=self.quality_alerts,
         )
+
+    def save_html(self, path: str | Path) -> None:
+        """Export standalone HTML report to disk."""
+        target = Path(path)
+        target.write_text(self._repr_html_(), encoding="utf-8")
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         from rich.panel import Panel

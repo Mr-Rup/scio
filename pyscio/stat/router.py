@@ -72,7 +72,9 @@ def evaluate_normality_with_clt(
             f"{n_res.test_used} rejected (p={n_res.p:.4g}), but N={n:,} >= 500, "
             f"skewness={n_res.skewness:.2f}, kurtosis={n_res.excess_kurtosis:.2f}"
         )
-        clt_note = "Central Limit Theorem holds (N >= 500, moderate skew/kurtosis); parametric test robust"
+        clt_note = (
+            "Central Limit Theorem holds (N >= 500, moderate skew/kurtosis); parametric test robust"
+        )
     else:
         passed = False
         details = (
