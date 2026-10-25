@@ -25,6 +25,8 @@ register_accessor()
 
 # Top-level aliases
 read = eda.read
+compare = stat.compare
+screen = stat.screen
 
 __all__ = [
     "__version__",
@@ -33,4 +35,6 @@ __all__ = [
     "eda",
     "stat",
     "read",
+    "compare",
+    "screen",
 ]

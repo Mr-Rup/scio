@@ -2,16 +2,27 @@
 
 from __future__ import annotations
 
-from typing import Any
+from pyscio.stat.compare import compare
+from pyscio.stat.power import power_anova, power_t
+from pyscio.stat.router import (
+    evaluate_normality_with_clt,
+    route_contingency,
+    route_independent_two_sample,
+    route_k_sample,
+    route_one_sample,
+    route_paired_two_sample,
+)
+from pyscio.stat.screen import screen
 
-__all__ = ["compare", "screen"]
-
-
-def compare(data: Any, x: str, y: str, **kwargs: Any) -> Any:
-    """Autonomous hypothesis testing comparing target variable `y` across groups `x`."""
-    raise NotImplementedError("pyscio.stat.compare is implemented in Phase 5.")
-
-
-def screen(data: Any, y: str, **kwargs: Any) -> Any:
-    """Multi-feature discovery screening against target outcome `y` with FDR control."""
-    raise NotImplementedError("pyscio.stat.screen is implemented in Phase 5.")
+__all__ = [
+    "compare",
+    "screen",
+    "power_t",
+    "power_anova",
+    "route_independent_two_sample",
+    "route_paired_two_sample",
+    "route_one_sample",
+    "route_k_sample",
+    "route_contingency",
+    "evaluate_normality_with_clt",
+]

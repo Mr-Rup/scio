@@ -11,7 +11,9 @@ from pyscio.eda.roles import Role, classify
 from pyscio.functional.effects import cramers_v
 
 
-def correlations(df: pd.DataFrame, method: Literal["pearson", "spearman"] = "pearson") -> pd.DataFrame:
+def correlations(
+    df: pd.DataFrame, method: Literal["pearson", "spearman"] = "pearson"
+) -> pd.DataFrame:
     """Compute pairwise numeric correlation matrix (Pearson or Spearman)."""
     num_df = df.select_dtypes(include=[np.number])
     if num_df.shape[1] < 2:

@@ -205,15 +205,17 @@ def mann_whitney(
 
 def wilcoxon(
     a: np.ndarray | list[float],
-    b: np.ndarray | list[float],
+    b: np.ndarray | list[float] | None = None,
     alternative: str = "two-sided",
 ) -> NonParametricResult:
-    """Wilcoxon signed-rank test for paired samples."""
+    """Wilcoxon signed-rank test for paired samples or one-sample difference from zero."""
     g1 = clean_1d(a, name="sample_a")
-    g2 = clean_1d(b, name="sample_b")
-    check_paired(g1, g2, check_diff_var=False)
-
-    res = stats.wilcoxon(g1, g2, alternative=alternative)
+    if b is not None:
+        g2 = clean_1d(b, name="sample_b")
+        check_paired(g1, g2, check_diff_var=False)
+        res = stats.wilcoxon(g1, g2, alternative=alternative)
+    else:
+        res = stats.wilcoxon(g1, alternative=alternative)
     return NonParametricResult(stat=float(res.statistic), p=float(res.pvalue))
 
 
