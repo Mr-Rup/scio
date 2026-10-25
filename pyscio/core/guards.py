@@ -154,15 +154,21 @@ def check_groups(group_a: np.ndarray, group_b: np.ndarray, min_n: int = 3) -> No
     check_variance(group_b, name="group_b")
 
 
-def check_paired(group_a: np.ndarray, group_b: np.ndarray, min_n: int = 3) -> None:
-    """Ensure paired samples have equal lengths and non-zero diff variance."""
+def check_paired(
+    group_a: np.ndarray,
+    group_b: np.ndarray,
+    min_n: int = 3,
+    check_diff_var: bool = False,
+) -> None:
+    """Ensure paired samples have equal lengths and optional non-zero diff variance."""
     if len(group_a) != len(group_b):
         raise ValueError(
             f"Paired samples must have identical lengths, but got N1={len(group_a)} and N2={len(group_b)}."
         )
     check_sample_size(group_a, min_n=min_n, name="paired_samples")
-    diffs = group_a - group_b
-    check_variance(diffs, name="paired_differences")
+    if check_diff_var:
+        diffs = group_a - group_b
+        check_variance(diffs, name="paired_differences")
 
 
 def check_low_power(n: int, threshold: int = 15) -> str | None:
