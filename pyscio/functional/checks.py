@@ -91,7 +91,9 @@ def check_normality(x: np.ndarray | list[float], alpha: float = 0.05) -> Normali
     return dagostino(arr, alpha=alpha)
 
 
-def levene(*groups: np.ndarray | list[float], center: str = "median", alpha: float = 0.05) -> HomoscedasticityResult:
+def levene(
+    *groups: np.ndarray | list[float], center: str = "median", alpha: float = 0.05
+) -> HomoscedasticityResult:
     """Perform Levene's test for equal variances across 2 or more groups.
 
     Center='median' computes Brown-Forsythe version, robust to non-normality.

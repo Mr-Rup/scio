@@ -34,7 +34,9 @@ class ZeroVarError(StatError):
 class DtypeError(ScioError):
     """Raised when an array or column has a data type incompatible with the requested operation."""
 
-    def __init__(self, message: str, actual_dtype: str | None = None, expected: str | None = None) -> None:
+    def __init__(
+        self, message: str, actual_dtype: str | None = None, expected: str | None = None
+    ) -> None:
         super().__init__(message)
         self.actual_dtype: str | None = actual_dtype
         self.expected: str | None = expected
@@ -43,7 +45,9 @@ class DtypeError(ScioError):
 class AssumptionError(StatError):
     """Raised when a mandatory statistical assumption fails and no valid fallback is permitted."""
 
-    def __init__(self, message: str, assumption_name: str | None = None, p_value: float | None = None) -> None:
+    def __init__(
+        self, message: str, assumption_name: str | None = None, p_value: float | None = None
+    ) -> None:
         super().__init__(message)
         self.assumption_name: str | None = assumption_name
         self.p_value: float | None = p_value

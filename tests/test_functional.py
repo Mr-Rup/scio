@@ -10,6 +10,7 @@ import pyscio.functional as F
 # 1. Assumption Checks Tests
 # =============================================================================
 
+
 def test_normality_checks() -> None:
     rng = np.random.default_rng(42)
     normal_data = rng.normal(loc=0.0, scale=1.0, size=100)
@@ -63,6 +64,7 @@ def test_iqr_bounds() -> None:
 # =============================================================================
 # 2. Hypothesis Testing Kernels Tests
 # =============================================================================
+
 
 def test_student_and_welch_t() -> None:
     rng = np.random.default_rng(42)
@@ -147,6 +149,7 @@ def test_chisq_and_fisher() -> None:
 # 3. Effect Size Kernels Tests (including O(N log N) Cliff's delta)
 # =============================================================================
 
+
 def test_cohen_d_and_hedges_g() -> None:
     g1 = [10.0, 11.0, 12.0, 10.0, 11.0]
     g2 = [13.0, 14.0, 15.0, 13.0, 14.0]
@@ -206,6 +209,7 @@ def test_interpret_effect() -> None:
 # 4. Post-Hoc Pairwise Tests
 # =============================================================================
 
+
 def test_tukey_hsd() -> None:
     g1 = [10, 11, 12, 10, 11]
     g2 = [15, 16, 17, 15, 16]
@@ -237,6 +241,7 @@ def test_dunn_test() -> None:
 # =============================================================================
 # 5. Multiple Testing & Power Analysis Tests
 # =============================================================================
+
 
 def test_fdr_bh() -> None:
     raw_p = [0.001, 0.01, 0.04, 0.08, 0.50]

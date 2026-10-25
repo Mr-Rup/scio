@@ -126,7 +126,9 @@ def power_t(n: int, d: float, alpha: float = 0.05) -> float:
     t_crit = stats.t.ppf(1.0 - alpha / 2.0, df=dof)
 
     # Power under non-central t-distribution
-    power = float(1.0 - stats.nct.cdf(t_crit, df=dof, nc=delta) + stats.nct.cdf(-t_crit, df=dof, nc=delta))
+    power = float(
+        1.0 - stats.nct.cdf(t_crit, df=dof, nc=delta) + stats.nct.cdf(-t_crit, df=dof, nc=delta)
+    )
     return float(np.clip(power, 0.0, 1.0))
 
 

@@ -71,9 +71,7 @@ def clean_1d(
     try:
         a = np.asarray(arr, dtype=np.float64)
     except (TypeError, ValueError) as err:
-        raise ValueError(
-            f"Cannot convert '{name}' to a continuous float64 array: {err}"
-        ) from err
+        raise ValueError(f"Cannot convert '{name}' to a continuous float64 array: {err}") from err
 
     if a.ndim == 0:
         raise ValueError(f"'{name}' must be 1D, but got a 0-dimensional scalar.")
@@ -84,7 +82,9 @@ def clean_1d(
             raise ValueError(f"'{name}' must be 1-dimensional, but got shape {a.shape}.")
 
     if np.isinf(a).any():
-        raise ValueError(f"'{name}' contains infinite values (+/- inf), which are invalid for statistical testing.")
+        raise ValueError(
+            f"'{name}' contains infinite values (+/- inf), which are invalid for statistical testing."
+        )
 
     if dropna:
         valid_mask = ~np.isnan(a)

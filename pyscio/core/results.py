@@ -108,8 +108,14 @@ class TestResult(BaseResult):
                 ["Statistic", f"{self.stat:.4f}"],
                 ["p-value", self.p_display],
                 ["Significant (α=0.05)", "Yes" if self.sig else "No"],
-                ["Effect Size", f"{self.effect:.4f} ({self.metric}, {self.magnitude})" if self.effect else "-"],
-                ["Confidence Interval", f"[{self.ci[0]:.4f}, {self.ci[1]:.4f}]" if self.ci else "-"],
+                [
+                    "Effect Size",
+                    f"{self.effect:.4f} ({self.metric}, {self.magnitude})" if self.effect else "-",
+                ],
+                [
+                    "Confidence Interval",
+                    f"[{self.ci[0]:.4f}, {self.ci[1]:.4f}]" if self.ci else "-",
+                ],
             ]
             return format_markdown_table(headers, rows)
 
@@ -146,7 +152,9 @@ class TestResult(BaseResult):
         if self.effect is not None and self.metric:
             metrics.append((self.metric, f"{self.effect:.3f} ({self.magnitude})"))
         if self.ci is not None:
-            metrics.append((f"{int(self.ci_level*100)}% CI", f"[{self.ci[0]:.3f}, {self.ci[1]:.3f}]"))
+            metrics.append(
+                (f"{int(self.ci_level * 100)}% CI", f"[{self.ci[0]:.3f}, {self.ci[1]:.3f}]")
+            )
 
         details = [
             ("Comparison", f"{self.y_name} ~ {self.x_name}"),
@@ -178,13 +186,19 @@ class TestResult(BaseResult):
         if self.dof is not None:
             table.add_row("Degrees of Freedom", str(self.dof))
         if self.ci:
-            table.add_row(f"{int(self.ci_level*100)}% Confidence Interval", f"[{self.ci[0]:.4f}, {self.ci[1]:.4f}]")
+            table.add_row(
+                f"{int(self.ci_level * 100)}% Confidence Interval",
+                f"[{self.ci[0]:.4f}, {self.ci[1]:.4f}]",
+            )
         if self.effect is not None:
             table.add_row("Effect Size", f"{self.metric} = {self.effect:.4f} ({self.magnitude})")
 
         for c in self.checks:
             style = "green" if c.passed else "yellow"
-            table.add_row(f"Assumption: {c.name}", f"[{style}]{'PASSED' if c.passed else 'VIOLATED'}[/{style}] (p={c.p:.4g})")
+            table.add_row(
+                f"Assumption: {c.name}",
+                f"[{style}]{'PASSED' if c.passed else 'VIOLATED'}[/{style}] (p={c.p:.4g})",
+            )
 
         for w in self.warns:
             table.add_row("Audit Alert", f"[yellow]⚠️ {w}[/yellow]")
@@ -261,6 +275,7 @@ class ColProfile(BaseResult):
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         from rich.panel import Panel
+
         yield Panel(self.summary(), title=f"Column: {self.name}")
 
 
@@ -332,7 +347,11 @@ class EDAReport(BaseResult):
         return "\n".join(lines)
 
     def _repr_html_(self) -> str:
-        badge_color = "#10b981" if self.health_score >= 80 else ("#f59e0b" if self.health_score >= 60 else "#ef4444")
+        badge_color = (
+            "#10b981"
+            if self.health_score >= 80
+            else ("#f59e0b" if self.health_score >= 60 else "#ef4444")
+        )
         return format_html_card(
             title="Exploratory Data Analysis Report",
             subtitle=f"{self.n_rows:,} rows × {self.n_cols} columns",
@@ -347,6 +366,7 @@ class EDAReport(BaseResult):
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         from rich.panel import Panel
+
         yield Panel(self.summary(), title="pyscio EDA Report", border_style="cyan")
 
 
@@ -369,7 +389,9 @@ class ScreenReport(BaseResult):
             "target": self.target,
             "n_features": self.n_features,
             "alpha": self.alpha,
-            "n_discoveries": int(self.leaderboard_df["significant_fdr"].sum()) if "significant_fdr" in self.leaderboard_df else 0,
+            "n_discoveries": int(self.leaderboard_df["significant_fdr"].sum())
+            if "significant_fdr" in self.leaderboard_df
+            else 0,
             "results": [r.to_dict() for r in self.results],
         }
 
@@ -377,7 +399,11 @@ class ScreenReport(BaseResult):
         return self.leaderboard_df
 
     def summary(self, format: str = "text") -> str:
-        n_sig = int(self.leaderboard_df["significant_fdr"].sum()) if "significant_fdr" in self.leaderboard_df else 0
+        n_sig = (
+            int(self.leaderboard_df["significant_fdr"].sum())
+            if "significant_fdr" in self.leaderboard_df
+            else 0
+        )
         return (
             f"Discovery Screening Target: {self.target}\n"
             f"Features Screened: {self.n_features}\n"
@@ -386,7 +412,11 @@ class ScreenReport(BaseResult):
         )
 
     def _repr_html_(self) -> str:
-        n_sig = int(self.leaderboard_df["significant_fdr"].sum()) if "significant_fdr" in self.leaderboard_df else 0
+        n_sig = (
+            int(self.leaderboard_df["significant_fdr"].sum())
+            if "significant_fdr" in self.leaderboard_df
+            else 0
+        )
         metrics = [
             ("Target", self.target),
             ("Features", str(self.n_features)),
@@ -401,4 +431,7 @@ class ScreenReport(BaseResult):
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         from rich.panel import Panel
-        yield Panel(self.summary(), title=f"Screening Report: {self.target}", border_style="magenta")
+
+        yield Panel(
+            self.summary(), title=f"Screening Report: {self.target}", border_style="magenta"
+        )

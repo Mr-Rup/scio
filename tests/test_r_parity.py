@@ -14,6 +14,7 @@ import pyscio.functional as F
 # 1. Welch's and Student's t-test Parity
 # =============================================================================
 
+
 def test_r_parity_welch_t() -> None:
     """Benchmark:
     x = [14.2, 15.1, 14.8, 15.4, 15.0, 14.9, 15.2, 14.6]
@@ -54,6 +55,7 @@ def test_r_parity_student_t() -> None:
 # 2. ANOVA and Kruskal-Wallis Parity
 # =============================================================================
 
+
 def test_r_parity_anova() -> None:
     """Benchmark:
     g1 = [2.4, 3.5, 3.2, 2.8, 3.0]
@@ -90,6 +92,7 @@ def test_r_parity_kruskal() -> None:
 # =============================================================================
 # 3. Categorical Tests Parity
 # =============================================================================
+
 
 def test_r_parity_chisq() -> None:
     """Benchmark:

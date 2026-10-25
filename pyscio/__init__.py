@@ -23,10 +23,14 @@ except PackageNotFoundError:
 # Register the DataFrame accessor: df.scio
 register_accessor()
 
+# Top-level aliases
+read = eda.read
+
 __all__ = [
     "__version__",
     "F",
     "functional",
     "eda",
     "stat",
+    "read",
 ]

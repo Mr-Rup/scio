@@ -126,7 +126,9 @@ def cramers_v(table: np.ndarray | list[list[float]], bias_correction: bool = Tru
     return float(np.clip(v, 0.0, 1.0))
 
 
-def odds_ratio(table: np.ndarray | list[list[int | float]], conf_level: float = 0.95) -> OddsRatioResult:
+def odds_ratio(
+    table: np.ndarray | list[list[int | float]], conf_level: float = 0.95
+) -> OddsRatioResult:
     """Compute Odds Ratio with 95% Confidence Interval for a 2x2 table.
 
     Applies Haldane-Anscombe 0.5 correction if zero cells are detected.

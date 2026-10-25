@@ -76,8 +76,7 @@ def format_html_card(
     warnings_html = ""
     if warnings:
         warn_items = "".join(
-            f"""<li style="margin-bottom: 3px;">{html.escape(w)}</li>"""
-            for w in warnings
+            f"""<li style="margin-bottom: 3px;">{html.escape(w)}</li>""" for w in warnings
         )
         warnings_html = f"""
         <div style="margin-top: 12px; padding: 8px 12px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 12px; color: #b45309;">
@@ -124,13 +123,14 @@ def format_markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     header_line = "| " + " | ".join(h.ljust(widths[i]) for i, h in enumerate(str_headers)) + " |"
     sep_line = "|-" + "-|-".join("-" * widths[i] for i in range(len(str_headers))) + "-|"
     data_lines = [
-        "| " + " | ".join(r[i].ljust(widths[i]) for i in range(len(r))) + " |"
-        for r in str_rows
+        "| " + " | ".join(r[i].ljust(widths[i]) for i in range(len(r))) + " |" for r in str_rows
     ]
     return "\n".join([header_line, sep_line] + data_lines)
 
 
-def format_latex_table(headers: list[str], rows: list[list[Any]], caption: str | None = None) -> str:
+def format_latex_table(
+    headers: list[str], rows: list[list[Any]], caption: str | None = None
+) -> str:
     """Format tabular data into a publication-ready LaTeX table."""
     alignments = "l" * len(headers)
     header_str = " & ".join(headers) + r" \\ \hline"
@@ -142,9 +142,7 @@ def format_latex_table(headers: list[str], rows: list[list[Any]], caption: str |
         f"{caption_str}"
         f"\\begin{{tabular}}{{{alignments}}}\n"
         "\\hline\n"
-        f"{header_str}\n"
-        + "\n".join(row_strs)
-        + "\n\\hline\n"
+        f"{header_str}\n" + "\n".join(row_strs) + "\n\\hline\n"
         "\\end{tabular}\n"
         "\\end{table}"
     )

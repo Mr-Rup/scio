@@ -13,5 +13,7 @@ def main() -> int:
     console.print(
         "[bold cyan]pyscio[/bold cyan]: Autonomous Statistical Inference Engine & One-Tap EDA"
     )
-    console.print("Run [green]python -m pyscio --help[/green] or import in your Python environment.")
+    console.print(
+        "Run [green]python -m pyscio --help[/green] or import in your Python environment."
+    )
     return 0

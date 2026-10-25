@@ -42,6 +42,7 @@ from pyscio.core.results import (
 # 1. Exception Hierarchy Tests
 # =============================================================================
 
+
 def test_exception_hierarchy() -> None:
     """Verify ScioError is the base for all domain exceptions."""
     assert issubclass(StatError, ScioError)
@@ -69,6 +70,7 @@ def test_exception_attributes() -> None:
 # =============================================================================
 # 2. Input Guards & Numerical Clamps Tests
 # =============================================================================
+
 
 def test_clamp_p_underflow() -> None:
     """Verify p-value clamping at machine epsilon."""
@@ -162,6 +164,7 @@ def test_check_low_power() -> None:
 # 3. Formatters Tests
 # =============================================================================
 
+
 def test_format_markdown_and_latex_table() -> None:
     """Verify Markdown and LaTeX table renderers."""
     headers = ["Metric", "Value"]
@@ -194,6 +197,7 @@ def test_format_html_card() -> None:
 # =============================================================================
 # 4. Result Containers Tests
 # =============================================================================
+
 
 def test_check_result() -> None:
     """Verify CheckResult container and serialization."""

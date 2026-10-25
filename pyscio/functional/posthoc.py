@@ -26,7 +26,7 @@ def tukey(
     if k < 2:
         raise ValueError("Tukey HSD requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i+1}" for i in range(k)]
+    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
     res = stats.tukey_hsd(*cleaned)
 
     records = []
@@ -39,15 +39,17 @@ def tukey(
         ci_low = float(ci.low[i, j])
         ci_high = float(ci.high[i, j])
 
-        records.append({
-            "group1": group_labels[i],
-            "group2": group_labels[j],
-            "diff": diff,
-            "p_adj": p_val,
-            "ci_low": ci_low,
-            "ci_high": ci_high,
-            "reject": p_val < alpha,
-        })
+        records.append(
+            {
+                "group1": group_labels[i],
+                "group2": group_labels[j],
+                "diff": diff,
+                "p_adj": p_val,
+                "ci_low": ci_low,
+                "ci_high": ci_high,
+                "reject": p_val < alpha,
+            }
+        )
 
     return pd.DataFrame(records)
 
@@ -66,7 +68,7 @@ def games_howell(
     if k < 2:
         raise ValueError("Games-Howell requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i+1}" for i in range(k)]
+    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
 
     means = [float(np.mean(g)) for g in cleaned]
     vars_ = [float(np.var(g, ddof=1)) for g in cleaned]
@@ -81,7 +83,7 @@ def games_howell(
 
         # Welch-Satterthwaite df
         denom = ((vars_[i] / ns[i]) ** 2 / (ns[i] - 1)) + ((vars_[j] / ns[j]) ** 2 / (ns[j] - 1))
-        df = (se2 ** 2) / denom if denom > 0 else 1.0
+        df = (se2**2) / denom if denom > 0 else 1.0
 
         # Studentized range statistic q = t * sqrt(2)
         t = abs(m_diff) / se if se > 0 else 0.0
@@ -94,15 +96,17 @@ def games_howell(
         ci_low = m_diff - margin
         ci_high = m_diff + margin
 
-        records.append({
-            "group1": group_labels[i],
-            "group2": group_labels[j],
-            "diff": m_diff,
-            "p_adj": p_val,
-            "ci_low": ci_low,
-            "ci_high": ci_high,
-            "reject": p_val < alpha,
-        })
+        records.append(
+            {
+                "group1": group_labels[i],
+                "group2": group_labels[j],
+                "diff": m_diff,
+                "p_adj": p_val,
+                "ci_low": ci_low,
+                "ci_high": ci_high,
+                "reject": p_val < alpha,
+            }
+        )
 
     return pd.DataFrame(records)
 
@@ -119,7 +123,7 @@ def dunn(
     if k < 2:
         raise ValueError("Dunn test requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i+1}" for i in range(k)]
+    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
 
     # Pool and compute ranks
     all_data = np.concatenate(cleaned)
@@ -162,13 +166,15 @@ def dunn(
 
     records = []
     for idx_pair, (i, j) in enumerate(pairs):
-        records.append({
-            "group1": group_labels[i],
-            "group2": group_labels[j],
-            "rank_diff": diffs[idx_pair],
-            "p_raw": raw_p_values[idx_pair],
-            "p_adj": float(p_adjs[idx_pair]),
-            "reject": p_adjs[idx_pair] < alpha,
-        })
+        records.append(
+            {
+                "group1": group_labels[i],
+                "group2": group_labels[j],
+                "rank_diff": diffs[idx_pair],
+                "p_raw": raw_p_values[idx_pair],
+                "p_adj": float(p_adjs[idx_pair]),
+                "reject": p_adjs[idx_pair] < alpha,
+            }
+        )
 
     return pd.DataFrame(records)
