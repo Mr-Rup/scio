@@ -20,8 +20,8 @@ class ScioAccessor:
 
         return profile(self._obj, **kwargs)
 
-    def compare(self, x: str, y: str, **kwargs: Any) -> Any:
-        """Run autonomous hypothesis testing comparing target variable `y` across groups `x`."""
+    def compare(self, x: str, y: str | None = None, **kwargs: Any) -> Any:
+        """Run autonomous hypothesis testing comparing target variable `y` across groups `x` or formula."""
         from pyscio.stat import compare
 
         return compare(self._obj, x=x, y=y, **kwargs)
@@ -31,6 +31,18 @@ class ScioAccessor:
         from pyscio.stat import screen
 
         return screen(self._obj, y=y, **kwargs)
+
+    def ols(self, formula: str, **kwargs: Any) -> Any:
+        """Fit Ordinary Least Squares (OLS) regression with HC3 robust standard errors."""
+        from pyscio.stat import ols
+
+        return ols(self._obj, formula=formula, **kwargs)
+
+    def logistic(self, formula: str, **kwargs: Any) -> Any:
+        """Fit binary Logistic Regression via Newton-Raphson IRLS."""
+        from pyscio.stat import logistic
+
+        return logistic(self._obj, formula=formula, **kwargs)
 
 
 def register_accessor() -> None:

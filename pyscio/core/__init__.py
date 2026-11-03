@@ -26,6 +26,7 @@ from pyscio.core.results import (
     CheckResult,
     ColProfile,
     EDAReport,
+    RegressionResult,
     ScreenReport,
     TestResult,
 )
@@ -52,6 +53,7 @@ __all__ = [
     # Results
     "CheckResult",
     "TestResult",
+    "RegressionResult",
     "ColProfile",
     "EDAReport",
     "ScreenReport",

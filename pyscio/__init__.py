@@ -27,6 +27,9 @@ register_accessor()
 read = eda.read
 compare = stat.compare
 screen = stat.screen
+ols = stat.ols
+logistic = stat.logistic
+tost = functional.tost
 
 __all__ = [
     "__version__",
@@ -37,4 +40,7 @@ __all__ = [
     "read",
     "compare",
     "screen",
+    "ols",
+    "logistic",
+    "tost",
 ]

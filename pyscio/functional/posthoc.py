@@ -1,8 +1,7 @@
-"""Pairwise post-hoc tests: Tukey HSD, Games-Howell, and Dunn's test."""
+"""Pairwise post-hoc tests: Tensor-broadcasted Tukey HSD, Games-Howell, and Dunn's test."""
 
 from __future__ import annotations
 
-import itertools
 import math
 
 import numpy as np
@@ -26,32 +25,32 @@ def tukey(
     if k < 2:
         raise ValueError("Tukey HSD requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
+    group_labels = np.asarray(
+        names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)],
+        dtype=object,
+    )
     res = stats.tukey_hsd(*cleaned)
+    ci = res.confidence_interval(confidence_level=1.0 - alpha)
 
-    records = []
-    pairs = list(itertools.combinations(range(k), 2))
-    for i, j in pairs:
-        diff = float(np.mean(cleaned[i]) - np.mean(cleaned[j]))
-        p_val = float(res.pvalue[i, j])
-        # confidence interval at 1 - alpha
-        ci = res.confidence_interval(confidence_level=1.0 - alpha)
-        ci_low = float(ci.low[i, j])
-        ci_high = float(ci.high[i, j])
+    means = np.array([np.mean(g) for g in cleaned], dtype=np.float64)
+    idx_i, idx_j = np.triu_indices(k, k=1)
 
-        records.append(
-            {
-                "group1": group_labels[i],
-                "group2": group_labels[j],
-                "diff": diff,
-                "p_adj": p_val,
-                "ci_low": ci_low,
-                "ci_high": ci_high,
-                "reject": p_val < alpha,
-            }
-        )
+    diffs = means[idx_i] - means[idx_j]
+    p_vals = np.asarray(res.pvalue[idx_i, idx_j], dtype=np.float64)
+    ci_lows = np.asarray(ci.low[idx_i, idx_j], dtype=np.float64)
+    ci_highs = np.asarray(ci.high[idx_i, idx_j], dtype=np.float64)
 
-    return pd.DataFrame(records)
+    return pd.DataFrame(
+        {
+            "group1": group_labels[idx_i],
+            "group2": group_labels[idx_j],
+            "diff": diffs,
+            "p_adj": p_vals,
+            "ci_low": ci_lows,
+            "ci_high": ci_highs,
+            "reject": p_vals < alpha,
+        }
+    )
 
 
 def games_howell(
@@ -59,56 +58,58 @@ def games_howell(
     names: list[str] | None = None,
     alpha: float = 0.05,
 ) -> pd.DataFrame:
-    """Games-Howell post-hoc test for unequal variances and sample sizes.
+    """Vectorized Games-Howell post-hoc test for unequal variances and sample sizes.
 
-    Uses Welch-Satterthwaite degrees of freedom and Studentized Range distribution.
+    Uses tensor-broadcasted Welch-Satterthwaite degrees of freedom and Studentized Range distribution.
     """
     cleaned = [clean_1d(g, name=f"group_{i}") for i, g in enumerate(groups)]
     k = len(cleaned)
     if k < 2:
         raise ValueError("Games-Howell requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
+    group_labels = np.asarray(
+        names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)],
+        dtype=object,
+    )
 
-    means = [float(np.mean(g)) for g in cleaned]
-    vars_ = [float(np.var(g, ddof=1)) for g in cleaned]
-    ns = [len(g) for g in cleaned]
+    means = np.array([np.mean(g) for g in cleaned], dtype=np.float64)
+    vars_ = np.array([np.var(g, ddof=1) for g in cleaned], dtype=np.float64)
+    ns = np.array([len(g) for g in cleaned], dtype=np.float64)
+    vn = vars_ / ns
 
-    records = []
-    pairs = list(itertools.combinations(range(k), 2))
-    for i, j in pairs:
-        m_diff = means[i] - means[j]
-        se2 = (vars_[i] / ns[i]) + (vars_[j] / ns[j])
-        se = math.sqrt(se2)
+    # Upper-triangle pairwise broadcasting over all K*(K-1)/2 pairs
+    idx_i, idx_j = np.triu_indices(k, k=1)
 
-        # Welch-Satterthwaite df
-        denom = ((vars_[i] / ns[i]) ** 2 / (ns[i] - 1)) + ((vars_[j] / ns[j]) ** 2 / (ns[j] - 1))
-        df = (se2**2) / denom if denom > 0 else 1.0
+    m_diff = means[idx_i] - means[idx_j]
+    se2 = vn[idx_i] + vn[idx_j]
+    se = np.sqrt(se2)
 
-        # Studentized range statistic q = t * sqrt(2)
-        t = abs(m_diff) / se if se > 0 else 0.0
-        q = t * math.sqrt(2.0)
-        p_val = float(stats.studentized_range.sf(q, k, df))
+    # Vectorized Welch-Satterthwaite degrees of freedom
+    denom = (vn[idx_i] ** 2) / (ns[idx_i] - 1.0) + (vn[idx_j] ** 2) / (ns[idx_j] - 1.0)
+    df = np.where(denom > 0.0, (se2**2) / denom, 1.0)
 
-        # Critical q for CI
-        q_crit = float(stats.studentized_range.ppf(1.0 - alpha, k, df))
-        margin = (q_crit / math.sqrt(2.0)) * se
-        ci_low = m_diff - margin
-        ci_high = m_diff + margin
+    # Vectorized Studentized range statistic q = t * sqrt(2)
+    t_stat = np.where(se > 0.0, np.abs(m_diff) / se, 0.0)
+    q_stat = t_stat * math.sqrt(2.0)
 
-        records.append(
-            {
-                "group1": group_labels[i],
-                "group2": group_labels[j],
-                "diff": m_diff,
-                "p_adj": p_val,
-                "ci_low": ci_low,
-                "ci_high": ci_high,
-                "reject": p_val < alpha,
-            }
-        )
+    p_vals = np.asarray(stats.studentized_range.sf(q_stat, k, df), dtype=np.float64)
+    q_crit = np.asarray(stats.studentized_range.ppf(1.0 - alpha, k, df), dtype=np.float64)
 
-    return pd.DataFrame(records)
+    margin = (q_crit / math.sqrt(2.0)) * se
+    ci_low = m_diff - margin
+    ci_high = m_diff + margin
+
+    return pd.DataFrame(
+        {
+            "group1": group_labels[idx_i],
+            "group2": group_labels[idx_j],
+            "diff": m_diff,
+            "p_adj": p_vals,
+            "ci_low": ci_low,
+            "ci_high": ci_high,
+            "reject": p_vals < alpha,
+        }
+    )
 
 
 def dunn(
@@ -117,64 +118,61 @@ def dunn(
     p_adjust: str = "holm",
     alpha: float = 0.05,
 ) -> pd.DataFrame:
-    """Dunn's non-parametric pairwise test following Kruskal-Wallis with multiple testing adjustment."""
+    """Vectorized Dunn's non-parametric pairwise test following Kruskal-Wallis."""
     cleaned = [clean_1d(g, name=f"group_{i}") for i, g in enumerate(groups)]
     k = len(cleaned)
     if k < 2:
         raise ValueError("Dunn test requires at least 2 groups.")
 
-    group_labels = names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)]
+    group_labels = np.asarray(
+        names if names and len(names) == k else [f"Group_{i + 1}" for i in range(k)],
+        dtype=object,
+    )
 
-    # Pool and compute ranks
+    # Pool and compute global ranks
     all_data = np.concatenate(cleaned)
     ranks = stats.rankdata(all_data)
 
-    ns = [len(g) for g in cleaned]
-    n_total = sum(ns)
+    ns = np.array([len(g) for g in cleaned], dtype=np.float64)
+    n_total = float(np.sum(ns))
 
-    # Compute mean ranks
-    mean_ranks = []
-    idx = 0
-    for n in ns:
-        mean_ranks.append(float(np.mean(ranks[idx : idx + n])))
-        idx += n
+    # Vectorized segment mean ranks via reduceat
+    offsets = np.zeros(k, dtype=np.intp)
+    offsets[1:] = np.cumsum([len(g) for g in cleaned[:-1]])
+    rank_sums = np.add.reduceat(ranks, offsets)
+    mean_ranks = rank_sums / ns
 
-    # Tie correction
+    # Vectorized tie correction
     _, counts = np.unique(ranks, return_counts=True)
-    ties_sum = sum(c**3 - c for c in counts if c > 1)
-    tie_corr = 1.0 - (ties_sum / (n_total**3 - n_total)) if n_total > 1 else 1.0
+    tied = counts[counts > 1].astype(np.float64)
+    ties_sum = float(np.sum(tied**3 - tied)) if len(tied) > 0 else 0.0
+    tie_corr = 1.0 - (ties_sum / (n_total**3 - n_total)) if n_total > 1.0 else 1.0
 
-    pairs = list(itertools.combinations(range(k), 2))
-    raw_p_values = []
-    diffs = []
+    # Upper-triangle pairwise broadcasting
+    idx_i, idx_j = np.triu_indices(k, k=1)
+    r_diff = mean_ranks[idx_i] - mean_ranks[idx_j]
+    base_var = (n_total * (n_total + 1.0) / 12.0) * tie_corr
+    se = np.sqrt(base_var * (1.0 / ns[idx_i] + 1.0 / ns[idx_j]))
+    z = np.where(se > 0.0, np.abs(r_diff) / se, 0.0)
+    raw_p_values = 2.0 * np.asarray(stats.norm.sf(z), dtype=np.float64)
 
-    for i, j in pairs:
-        r_diff = mean_ranks[i] - mean_ranks[j]
-        se = math.sqrt((n_total * (n_total + 1) / 12.0) * tie_corr * (1.0 / ns[i] + 1.0 / ns[j]))
-        z = abs(r_diff) / se if se > 0 else 0.0
-        p = 2.0 * float(stats.norm.sf(z))
-        diffs.append(r_diff)
-        raw_p_values.append(p)
-
-    # Adjust p-values
-    from pyscio.functional.adjust import fdr_bh, holm
+    # Multiple testing adjustment
+    from pyscio.functional.adjust import bonferroni, fdr_bh, holm
 
     if p_adjust == "fdr_bh":
         _, p_adjs = fdr_bh(raw_p_values, alpha=alpha)
+    elif p_adjust == "bonferroni":
+        _, p_adjs = bonferroni(raw_p_values, alpha=alpha)
     else:
         _, p_adjs = holm(raw_p_values, alpha=alpha)
 
-    records = []
-    for idx_pair, (i, j) in enumerate(pairs):
-        records.append(
-            {
-                "group1": group_labels[i],
-                "group2": group_labels[j],
-                "rank_diff": diffs[idx_pair],
-                "p_raw": raw_p_values[idx_pair],
-                "p_adj": float(p_adjs[idx_pair]),
-                "reject": p_adjs[idx_pair] < alpha,
-            }
-        )
-
-    return pd.DataFrame(records)
+    return pd.DataFrame(
+        {
+            "group1": group_labels[idx_i],
+            "group2": group_labels[idx_j],
+            "rank_diff": r_diff,
+            "p_raw": raw_p_values,
+            "p_adj": p_adjs.astype(np.float64),
+            "reject": p_adjs < alpha,
+        }
+    )

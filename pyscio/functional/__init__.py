@@ -22,19 +22,24 @@ from pyscio.functional.checks import (
     NormalityResult,
     bartlett,
     check_normality,
+    check_pathology,
     dagostino,
     iqr_bounds,
     levene,
+    sarle_bimodality,
     shapiro,
 )
 from pyscio.functional.effects import (
     OddsRatioResult,
     cliffs_d,
+    cliffs_d_ci,
     cohen_d,
+    cohen_d_ci,
     cramers_v,
     eps_sq,
     eta_sq,
     hedges_g,
+    hedges_g_ci,
     interpret_effect,
     odds_ratio,
     rank_biserial,
@@ -43,6 +48,18 @@ from pyscio.functional.posthoc import (
     dunn,
     games_howell,
     tukey,
+)
+from pyscio.functional.resample import (
+    bootstrap_ci,
+    permutation_test,
+    tost,
+)
+from pyscio.functional.robust import (
+    huber_location,
+    trimmed_mean,
+    winsorized_mean,
+    winsorized_var,
+    yuen_t,
 )
 from pyscio.functional.tests import (
     ANOVAResult,
@@ -83,19 +100,24 @@ __all__ = [
     "fisher",
     "ChiSqResult",
     "FisherResult",
-    # Assumption checks
+    # Assumption checks & pathology guards
     "shapiro",
     "dagostino",
     "check_normality",
     "levene",
     "bartlett",
     "iqr_bounds",
+    "sarle_bimodality",
+    "check_pathology",
     "NormalityResult",
     "HomoscedasticityResult",
-    # Effect sizes
+    # Effect sizes & exact CIs
     "cohen_d",
+    "cohen_d_ci",
     "hedges_g",
+    "hedges_g_ci",
     "cliffs_d",
+    "cliffs_d_ci",
     "rank_biserial",
     "eta_sq",
     "eps_sq",
@@ -107,6 +129,16 @@ __all__ = [
     "tukey",
     "games_howell",
     "dunn",
+    # Resampling & equivalence
+    "permutation_test",
+    "bootstrap_ci",
+    "tost",
+    # Robust statistics
+    "trimmed_mean",
+    "winsorized_mean",
+    "winsorized_var",
+    "huber_location",
+    "yuen_t",
     # Multiple testing & power
     "fdr_bh",
     "bonferroni",

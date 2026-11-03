@@ -17,14 +17,17 @@ from pyscio.core.guards import (
     clean_1d,
 )
 from pyscio.core.results import CheckResult, TestResult
-from pyscio.functional.checks import check_normality, levene
+from pyscio.functional.checks import check_normality, check_pathology, levene
 from pyscio.functional.effects import (
     cliffs_d,
+    cliffs_d_ci,
     cohen_d,
+    cohen_d_ci,
     cramers_v,
     eps_sq,
     eta_sq,
     hedges_g,
+    hedges_g_ci,
     interpret_effect,
     odds_ratio,
 )
@@ -49,20 +52,22 @@ def evaluate_normality_with_clt(
     name: str = "sample",
     alpha: float = 0.05,
 ) -> tuple[bool, CheckResult]:
-    """Check normality with the Large-N Central Limit Theorem (CLT) guard.
+    """Check normality with the Large-N Central Limit Theorem (CLT) and Pathology guards.
 
     If sample size N >= 500, formal normality tests (Shapiro-Wilk, D'Agostino) have excessive power
-    and reject normality even for micro-deviations. If |skewness| < 1.0 and |excess kurtosis| < 2.0,
-    the sampling distribution of the mean is asymptotically normal by the CLT.
+    and reject normality even for micro-deviations. If |skewness| < 1.0, |excess kurtosis| < 2.0,
+    and no distributional pathology (heavy-tailed/Cauchy, zero-inflated point mass, or bimodality)
+    is detected, the sampling distribution of the mean is asymptotically normal by the CLT.
     """
     n_res = check_normality(arr, alpha=alpha)
     n = len(arr)
     skew = abs(n_res.skewness)
     kurt = abs(n_res.excess_kurtosis)
 
-    clt_holds = n >= 500 and skew < 1.0 and kurt < 2.0
+    has_path, path_reasons = check_pathology(arr)
+    clt_holds = n >= 500 and skew < 1.0 and kurt < 2.0 and not has_path
 
-    if n_res.is_normal:
+    if n_res.is_normal and not has_path:
         passed = True
         details = f"{n_res.test_used}: p={n_res.p:.4g} >= {alpha}"
         clt_note = None
@@ -77,9 +82,10 @@ def evaluate_normality_with_clt(
         )
     else:
         passed = False
+        path_suffix = f"; pathology: {', '.join(path_reasons)}" if has_path else ""
         details = (
             f"{n_res.test_used} rejected (p={n_res.p:.4g} < {alpha}, "
-            f"skewness={n_res.skewness:.2f}, kurtosis={n_res.excess_kurtosis:.2f})"
+            f"skewness={n_res.skewness:.2f}, kurtosis={n_res.excess_kurtosis:.2f}{path_suffix})"
         )
         clt_note = None
 
@@ -155,9 +161,11 @@ def route_independent_two_sample(
         # Small sample size bias correction (Hedges' g) vs Cohen's d
         if total_n < 50:
             eff_val = hedges_g(arr1, arr2)
+            eff_ci: tuple[float, float] | None = hedges_g_ci(arr1, arr2, conf_level=1.0 - alpha)
             metric = "Hedges' g"
         else:
             eff_val = cohen_d(arr1, arr2)
+            eff_ci = cohen_d_ci(arr1, arr2, conf_level=1.0 - alpha)
             metric = "Cohen's d"
         magnitude = interpret_effect(metric, eff_val)
 
@@ -171,6 +179,7 @@ def route_independent_two_sample(
         ci = None
 
         eff_val = cliffs_d(arr1, arr2)
+        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha)
         metric = "Cliff's delta"
         magnitude = interpret_effect("cliff", eff_val)
 
@@ -187,6 +196,7 @@ def route_independent_two_sample(
         sig=p_val < alpha,
         alpha=alpha,
         effect=eff_val,
+        effect_ci=eff_ci,
         metric=metric,
         magnitude=magnitude,
         checks=checks,
@@ -230,6 +240,11 @@ def route_paired_two_sample(
 
         std_diff = float(np.std(diff, ddof=1))
         eff_val = float(np.mean(diff) / std_diff) if std_diff > 0 else 0.0
+        eff_ci: tuple[float, float] | None = (
+            cohen_d_ci(arr1, arr2, conf_level=1.0 - alpha, paired=True)
+            if std_diff > 0
+            else (0.0, 0.0)
+        )
         metric = "Cohen's d (paired)"
         magnitude = interpret_effect("cohen", eff_val)
     else:
@@ -241,6 +256,7 @@ def route_paired_two_sample(
         ci = None
 
         eff_val = cliffs_d(arr1, arr2)
+        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha)
         metric = "Rank-biserial r"
         magnitude = interpret_effect("cliff", eff_val)
 
@@ -257,6 +273,7 @@ def route_paired_two_sample(
         sig=p_val < alpha,
         alpha=alpha,
         effect=eff_val,
+        effect_ci=eff_ci,
         metric=metric,
         magnitude=magnitude,
         checks=checks,
@@ -296,6 +313,9 @@ def route_one_sample(
 
         s_val = float(np.std(arr, ddof=1))
         eff_val = float((np.mean(arr) - popmean) / s_val) if s_val > 0 else 0.0
+        eff_ci: tuple[float, float] | None = (
+            cohen_d_ci(arr, popmean=popmean, conf_level=1.0 - alpha) if s_val > 0 else (0.0, 0.0)
+        )
         metric = "Cohen's d (one-sample)"
         magnitude = interpret_effect("cohen", eff_val)
     else:
@@ -306,6 +326,7 @@ def route_one_sample(
         dof = None
         ci = None
         eff_val = None
+        eff_ci = None
         metric = None
         magnitude = None
 
@@ -322,6 +343,7 @@ def route_one_sample(
         sig=p_val < alpha,
         alpha=alpha,
         effect=eff_val,
+        effect_ci=eff_ci,
         metric=metric,
         magnitude=magnitude,
         checks=checks,

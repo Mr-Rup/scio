@@ -6,15 +6,52 @@ import math
 from typing import NamedTuple
 
 import numpy as np
-from scipy import stats
+from scipy import optimize, stats
 
-from pyscio.core.guards import check_groups, clean_1d
+from pyscio.core.guards import check_groups, check_paired, clean_1d
 
 
 class OddsRatioResult(NamedTuple):
     or_val: float
     ci: tuple[float, float]
     se_log: float
+
+
+def _nct_ci(
+    t_obs: float,
+    df: float,
+    scale_factor: float,
+    d_est: float,
+    conf_level: float = 0.95,
+) -> tuple[float, float]:
+    """Invert the non-central t-distribution for exact standardized effect size CIs."""
+    alpha = 1.0 - conf_level
+    p_upper_tail = 1.0 - alpha / 2.0
+    p_lower_tail = alpha / 2.0
+
+    # For large degrees of freedom (df > 200), non-central t converges to analytical normal SE
+    if df > 200.0 or not np.isfinite(t_obs):
+        z_crit = float(stats.norm.ppf(p_upper_tail))
+        se_d = math.sqrt((1.0 / (scale_factor**2)) + (d_est**2) / (2.0 * df))
+        return (float(d_est - z_crit * se_d), float(d_est + z_crit * se_d))
+
+    # Bracket width based on normal approximation
+    spread = max(10.0, abs(t_obs) * 3.0 + 12.0)
+
+    def obj_low(ncp: float) -> float:
+        return float(stats.nct.cdf(t_obs, df, ncp) - p_upper_tail)
+
+    def obj_high(ncp: float) -> float:
+        return float(stats.nct.cdf(t_obs, df, ncp) - p_lower_tail)
+
+    try:
+        ncp_low = float(optimize.brentq(obj_low, t_obs - spread, t_obs + spread, xtol=1e-6))
+        ncp_high = float(optimize.brentq(obj_high, t_obs - spread, t_obs + spread, xtol=1e-6))
+        return (float(ncp_low / scale_factor), float(ncp_high / scale_factor))
+    except (ValueError, RuntimeError):
+        z_crit = float(stats.norm.ppf(p_upper_tail))
+        se_d = math.sqrt((1.0 / (scale_factor**2)) + (d_est**2) / (2.0 * df))
+        return (float(d_est - z_crit * se_d), float(d_est + z_crit * se_d))
 
 
 def cohen_d(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
@@ -32,6 +69,50 @@ def cohen_d(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
     return float((np.mean(g1) - np.mean(g2)) / sp) if sp > 0 else 0.0
 
 
+def cohen_d_ci(
+    a: np.ndarray | list[float],
+    b: np.ndarray | list[float] | None = None,
+    conf_level: float = 0.95,
+    paired: bool = False,
+    popmean: float = 0.0,
+) -> tuple[float, float]:
+    """Compute exact Non-Central t (NCT) confidence interval for Cohen's d.
+
+    Supports two-sample independent, two-sample paired, and one-sample designs.
+    """
+    g1 = clean_1d(a, name="sample_a")
+    if b is None:
+        # One-sample Cohen's d CI
+        n = len(g1)
+        df = float(n - 1)
+        sd = float(np.std(g1, ddof=1))
+        d_est = float((np.mean(g1) - popmean) / sd) if sd > 0 else 0.0
+        scale = math.sqrt(n)
+        t_obs = d_est * scale
+        return _nct_ci(t_obs, df, scale, d_est, conf_level=conf_level)
+
+    g2 = clean_1d(b, name="sample_b")
+    if paired:
+        check_paired(g1, g2, check_diff_var=True)
+        diff = g1 - g2
+        n = len(diff)
+        df = float(n - 1)
+        sd_diff = float(np.std(diff, ddof=1))
+        d_est = float(np.mean(diff) / sd_diff) if sd_diff > 0 else 0.0
+        scale = math.sqrt(n)
+        t_obs = d_est * scale
+        return _nct_ci(t_obs, df, scale, d_est, conf_level=conf_level)
+
+    check_groups(g1, g2)
+    n1, n2 = len(g1), len(g2)
+    df = float(n1 + n2 - 2)
+    d_est = cohen_d(g1, g2)
+    n_eff = (n1 * n2) / (n1 + n2)
+    scale = math.sqrt(n_eff)
+    t_obs = d_est * scale
+    return _nct_ci(t_obs, df, scale, d_est, conf_level=conf_level)
+
+
 def hedges_g(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
     """Compute Hedges' g (Cohen's d with small-sample bias correction factor $J$)."""
     g1 = clean_1d(a, name="sample_a")
@@ -41,6 +122,20 @@ def hedges_g(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
     # Hedges (1981) small-sample approximation
     j = 1.0 - (3.0 / (4.0 * df - 1.0)) if df > 1 else 1.0
     return float(d * j)
+
+
+def hedges_g_ci(
+    a: np.ndarray | list[float],
+    b: np.ndarray | list[float],
+    conf_level: float = 0.95,
+) -> tuple[float, float]:
+    """Compute exact Non-Central t confidence interval for Hedges' g."""
+    g1 = clean_1d(a, name="sample_a")
+    g2 = clean_1d(b, name="sample_b")
+    df = len(g1) + len(g2) - 2
+    j = 1.0 - (3.0 / (4.0 * df - 1.0)) if df > 1 else 1.0
+    d_low, d_high = cohen_d_ci(g1, g2, conf_level=conf_level)
+    return (float(d_low * j), float(d_high * j))
 
 
 def cliffs_d(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
@@ -59,6 +154,26 @@ def cliffs_d(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:
     u = float(res.statistic)
     delta = (2.0 * u) / (n1 * n2) - 1.0
     return float(np.clip(delta, -1.0, 1.0))
+
+
+def cliffs_d_ci(
+    a: np.ndarray | list[float],
+    b: np.ndarray | list[float],
+    conf_level: float = 0.95,
+) -> tuple[float, float]:
+    """Compute confidence interval for Cliff's delta via hyperbolic tangent z-transformation."""
+    g1 = clean_1d(a, name="sample_a")
+    g2 = clean_1d(b, name="sample_b")
+    n1, n2 = len(g1), len(g2)
+    delta = cliffs_d(g1, g2)
+    # Clamp slightly away from +/-1 to prevent atanh singularity
+    d_clamped = float(np.clip(delta, -0.9999, 0.9999))
+    # Asymptotic variance of Cliff's delta under general alternative
+    var_d = ((1.0 - d_clamped**2) ** 2) * (n1 + n2 + 1.0) / (3.0 * n1 * n2)
+    se_z = math.sqrt(var_d) / (1.0 - d_clamped**2)
+    z = math.atanh(d_clamped)
+    z_crit = float(stats.norm.ppf(1.0 - (1.0 - conf_level) / 2.0))
+    return (float(math.tanh(z - z_crit * se_z)), float(math.tanh(z + z_crit * se_z)))
 
 
 def rank_biserial(a: np.ndarray | list[float], b: np.ndarray | list[float]) -> float:

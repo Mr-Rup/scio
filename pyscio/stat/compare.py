@@ -11,6 +11,8 @@ import pandas as pd
 from pyscio.core.errors import MissingDataError, StatError
 from pyscio.core.results import TestResult
 from pyscio.eda.roles import Role, classify_series
+from pyscio.functional.effects import interpret_effect
+from pyscio.stat.regression import _clean_var_name, extract_formula_vars, logistic, ols
 from pyscio.stat.router import (
     route_contingency,
     route_independent_two_sample,
@@ -28,43 +30,75 @@ def compare(
     paired: bool = False,
     alternative: str = "two-sided",
     mu: float = 0.0,
+    formula: str | None = None,
     **kwargs: Any,
 ) -> TestResult:
-    """Run autonomous hypothesis testing across groups, conditions, or against reference parameters.
+    """Run autonomous hypothesis testing across groups, conditions, formulas, or reference parameters.
 
     Automatically resolves data types, validates statistical assumptions (normality, sample size,
-    variance, homoscedasticity, Cochran's rule), applies the Large-N Central Limit Theorem guard,
-    routes to the mathematically optimal test, calculates standardized effect sizes, and executes
+    variance, homoscedasticity, Cochran's rule), applies the Large-N Central Limit Theorem and
+    distributional pathology guards, routes to the mathematically optimal test, calculates
+    standardized effect sizes with exact Non-Central t confidence intervals, and executes
     post-hoc multiple comparisons when omnibus K-group tests are significant.
 
-    Parameters
-    ----------
-    data : pd.DataFrame | array-like | None
-        Input tabular DataFrame, 2D contingency table, or 1D sample vector.
-    x : str | array-like | None
-        Independent grouping variable name or first data sample vector.
-    y : str | array-like | None
-        Dependent outcome variable name or second data sample vector.
-    alpha : float
-        Significance threshold (default 0.05).
-    paired : bool
-        Whether the comparison is between paired / repeated-measures samples (default False).
-    alternative : str
-        Alternative hypothesis: 'two-sided', 'less', or 'greater' (default 'two-sided').
-    mu : float
-        Hypothesized population mean for one-sample tests (default 0.0).
-
-    Returns
-    -------
-    TestResult
-        Complete typed result container with assumptions, effect size, confidence interval,
-        and optional post-hoc table.
+    Supports Wilkinson formula strings (e.g. ``compare(df, "y ~ x")`` or
+    ``compare(df, "y ~ x1 + x2 + C(group)")``).
     """
     # -------------------------------------------------------------------------
     # Case 1: Pandas DataFrame Input
     # -------------------------------------------------------------------------
     if isinstance(data, pd.DataFrame):
         df = data
+
+        # Detect Wilkinson formula in `formula` or `x`
+        active_formula = (
+            formula if formula is not None else (x if isinstance(x, str) and "~" in x else None)
+        )
+        if active_formula is not None:
+            lhs, rhs_terms = extract_formula_vars(active_formula)
+            non_intercept = [t for t in rhs_terms if t not in ("1", "0", "-1")]
+            if len(non_intercept) == 1 and ":" not in non_intercept[0]:
+                raw_x, _ = _clean_var_name(non_intercept[0])
+                if raw_x in df.columns and lhs in df.columns:
+                    role_rx = classify_series(df[raw_x])
+                    role_ly = classify_series(df[lhs])
+                    # If single categorical/binary predictor or contingency, use standard router
+                    if role_rx in (Role.CATEGORICAL, Role.BINARY) or role_ly in (
+                        Role.CATEGORICAL,
+                        Role.BINARY,
+                    ):
+                        x = raw_x
+                        y = lhs
+                        active_formula = None
+
+            if active_formula is not None:
+                role_lhs = classify_series(df[lhs]) if lhs in df.columns else Role.NUMERIC
+                if role_lhs == Role.BINARY and df[lhs].dropna().nunique() == 2:
+                    reg_res = logistic(df, active_formula, alpha=alpha)
+                    eff_metric = "McFadden Pseudo-R²"
+                else:
+                    reg_res = ols(df, active_formula, robust_se="HC3", alpha=alpha)
+                    eff_metric = "R-squared (R²)"
+                return TestResult(
+                    test_name=reg_res.model_type,
+                    x_name=" + ".join(non_intercept),
+                    y_name=reg_res.y_name,
+                    stat=reg_res.stat,
+                    p=reg_res.p,
+                    p_display=reg_res.p_display,
+                    dof=(float(reg_res.df_model), float(reg_res.df_resid)),
+                    ci=None,
+                    ci_level=1.0 - alpha,
+                    sig=reg_res.p < alpha,
+                    alpha=alpha,
+                    effect=reg_res.r_squared,
+                    effect_ci=None,
+                    metric=eff_metric,
+                    magnitude=interpret_effect("eta", reg_res.r_squared),
+                    checks=[],
+                    posthoc=reg_res.coef_df,
+                    warns=reg_res.warns,
+                )
 
         # Normalize x and y column arguments
         col_x = x if isinstance(x, str) else None
@@ -183,9 +217,13 @@ def compare(
     if isinstance(data, np.ndarray) and data.ndim == 2:
         return route_contingency(data, alpha=alpha)
 
-    # Extract sample A and sample B
-    sample_a = data if data is not None else x
-    sample_b = y
+    # Extract sample A and sample B (supports both compare(a, b) and compare(x=a, y=b))
+    if data is not None and x is not None and y is None:
+        sample_a: Any = data
+        sample_b: Any = x
+    else:
+        sample_a = data if data is not None else x
+        sample_b = y
 
     if sample_a is None:
         raise StatError("No input data or sample vectors provided to compare().")
@@ -193,7 +231,7 @@ def compare(
     # One-sample test: sample_a vs mu
     if sample_b is None:
         return route_one_sample(
-            sample_a,  # type: ignore[arg-type]
+            sample_a,
             popmean=mu,
             x_name="sample",
             alpha=alpha,
@@ -203,8 +241,8 @@ def compare(
     # Two-sample test: sample_a vs sample_b
     if paired:
         return route_paired_two_sample(
-            sample_a,  # type: ignore[arg-type]
-            sample_b,  # type: ignore[arg-type]
+            sample_a,
+            sample_b,
             x_name="sample_a",
             y_name="sample_b",
             alpha=alpha,
@@ -212,8 +250,8 @@ def compare(
         )
 
     return route_independent_two_sample(
-        sample_a,  # type: ignore[arg-type]
-        sample_b,  # type: ignore[arg-type]
+        sample_a,
+        sample_b,
         x_name="group_a vs group_b",
         y_name="measurement",
         alpha=alpha,

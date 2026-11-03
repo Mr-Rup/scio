@@ -138,3 +138,79 @@ def iqr_bounds(x: np.ndarray | list[float], k: float = 1.5) -> tuple[float, floa
     upper_bound = float(q75 + k * iqr)
     outliers_count = int(np.sum((arr < lower_bound) | (arr > upper_bound)))
     return lower_bound, upper_bound, outliers_count
+
+
+def sarle_bimodality(x: np.ndarray | list[float]) -> float:
+    """Compute Sarle's Bimodality Coefficient (BC).
+
+    $$BC = \\frac{\\gamma_1^2 + 1}{\\gamma_2 + 3 \\cdot \\frac{(n - 1)^2}{(n - 2)(n - 3)}}$$
+
+    Values exceeding $5/9 \\approx 0.555$ indicate bimodal or multimodal distributions.
+    """
+    arr = clean_1d(x, name="x")
+    n = len(arr)
+    if n < 4:
+        return 0.0
+    skew = float(stats.skew(arr, bias=False))
+    kurt = float(stats.kurtosis(arr, bias=False))
+    denom = kurt + 3.0 * ((n - 1.0) ** 2) / ((n - 2.0) * (n - 3.0))
+    if denom <= 1e-12:
+        return 0.0
+    return float((skew**2 + 1.0) / denom)
+
+
+def check_pathology(
+    x: np.ndarray | list[float],
+    tie_threshold: float = 0.30,
+    tail_ratio_max: float = 2.2,
+    bimodality_max: float = 0.555,
+) -> tuple[bool, list[str]]:
+    """Detect distributional pathologies where moment-based CLT and Levene guards fail.
+
+    Screens for:
+    1. Point-mass / zero-inflation (maximum single-value tie density >= tie_threshold).
+    2. Heavy-tailed / Cauchy-like regimes (SD / (IQR / 1.34898) > tail_ratio_max or > 2% extreme outliers).
+    3. Bimodal / multimodal regimes (Sarle's BC > bimodality_max with negative excess kurtosis).
+
+    Returns
+    -------
+    tuple[bool, list[str]]
+        (has_pathology, reasons)
+    """
+    arr = clean_1d(x, name="x")
+    n = len(arr)
+    if n < 4:
+        return False, []
+
+    reasons: list[str] = []
+
+    # 1. Point-mass / zero-inflation check
+    _, counts = np.unique(arr, return_counts=True)
+    max_tie_prop = float(np.max(counts) / n)
+    if max_tie_prop >= tie_threshold:
+        reasons.append(
+            f"Point-mass/zero-inflation ({max_tie_prop * 100:.1f}% tied at a single value)"
+        )
+
+    # 2. Heavy-tailed / infinite-variance check (SD vs Gaussian IQR scale & extreme outer fences)
+    q25, q75 = np.percentile(arr, [25, 75])
+    iqr = float(q75 - q25)
+    sd = float(np.std(arr, ddof=1))
+    if iqr > 1e-12:
+        normal_iqr_sd = iqr / 1.3489795003921634
+        tail_ratio = sd / normal_iqr_sd
+        extreme_low = q25 - 3.0 * iqr
+        extreme_high = q75 + 3.0 * iqr
+        extreme_prop = float(np.mean((arr < extreme_low) | (arr > extreme_high)))
+        if tail_ratio > tail_ratio_max or extreme_prop > 0.025:
+            reasons.append(
+                f"Heavy-tailed/outlier regime (tail scale ratio={tail_ratio:.2f}, extreme outliers={extreme_prop * 100:.1f}%)"
+            )
+
+    # 3. Bimodal / multimodal check via Sarle's BC
+    kurt = float(stats.kurtosis(arr, bias=False))
+    bc = sarle_bimodality(arr)
+    if bc > bimodality_max and kurt < -0.5:
+        reasons.append(f"Bimodal/multimodal regime (Sarle's BC={bc:.3f} > {bimodality_max})")
+
+    return len(reasons) > 0, reasons

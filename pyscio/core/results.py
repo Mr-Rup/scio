@@ -58,6 +58,7 @@ class TestResult(BaseResult):
     effect: float | None = None
     metric: str | None = None
     magnitude: str | None = None
+    effect_ci: tuple[float, float] | None = None
     checks: list[CheckResult] = field(default_factory=list)
     posthoc: pd.DataFrame | None = None
     warns: list[str] = field(default_factory=list)
@@ -78,6 +79,7 @@ class TestResult(BaseResult):
             "effect": self.effect,
             "metric": self.metric,
             "magnitude": self.magnitude,
+            "effect_ci": self.effect_ci,
             "checks": [c.to_dict() for c in self.checks],
             "posthoc": self.posthoc.to_dict(orient="records") if self.posthoc is not None else None,
             "warns": list(self.warns),
@@ -95,6 +97,8 @@ class TestResult(BaseResult):
             "effect_size": [self.effect if self.effect is not None else np.nan],
             "effect_metric": [self.metric if self.metric is not None else "-"],
             "magnitude": [self.magnitude if self.magnitude is not None else "-"],
+            "effect_ci_low": [self.effect_ci[0] if self.effect_ci else np.nan],
+            "effect_ci_high": [self.effect_ci[1] if self.effect_ci else np.nan],
             "ci_low": [self.ci[0] if self.ci else np.nan],
             "ci_high": [self.ci[1] if self.ci else np.nan],
         }
@@ -103,16 +107,20 @@ class TestResult(BaseResult):
     def summary(self, format: str = "text") -> str:
         if format == "markdown":
             headers = ["Metric", "Value"]
+            eff_str = (
+                f"{self.effect:.4f} ({self.metric}, {self.magnitude})"
+                if self.effect is not None
+                else "-"
+            )
+            if self.effect is not None and self.effect_ci is not None:
+                eff_str += f" CI[{self.effect_ci[0]:.4f}, {self.effect_ci[1]:.4f}]"
             rows = [
                 ["Test", self.test_name],
                 ["Target ~ Group", f"{self.y_name} ~ {self.x_name}"],
                 ["Statistic", f"{self.stat:.4f}"],
                 ["p-value", self.p_display],
                 ["Significant (α=0.05)", "Yes" if self.sig else "No"],
-                [
-                    "Effect Size",
-                    f"{self.effect:.4f} ({self.metric}, {self.magnitude})" if self.effect else "-",
-                ],
+                ["Effect Size", eff_str],
                 [
                     "Confidence Interval",
                     f"[{self.ci[0]:.4f}, {self.ci[1]:.4f}]" if self.ci else "-",
@@ -132,7 +140,10 @@ class TestResult(BaseResult):
         if self.ci is not None:
             lines.append(f"{int(self.ci_level * 100)}% CI: [{self.ci[0]:.5g}, {self.ci[1]:.5g}]")
         if self.effect is not None:
-            lines.append(f"Effect Size: {self.metric} = {self.effect:.4g} ({self.magnitude})")
+            eff_line = f"Effect Size: {self.metric} = {self.effect:.4g} ({self.magnitude})"
+            if self.effect_ci is not None:
+                eff_line += f", {int(self.ci_level * 100)}% CI [{self.effect_ci[0]:.4g}, {self.effect_ci[1]:.4g}]"
+            lines.append(eff_line)
         if self.checks:
             lines.append("Assumption Checks:")
             for c in self.checks:
@@ -441,3 +452,88 @@ class ScreenReport(BaseResult):
         yield Panel(
             self.summary(), title=f"Screening Report: {self.target}", border_style="magenta"
         )
+
+
+@dataclass(frozen=True)
+class RegressionResult(BaseResult):
+    """Multivariate regression result container (OLS / ANCOVA / Logistic GLM)."""
+
+    model_type: str
+    formula: str
+    y_name: str
+    n_obs: int
+    df_model: int
+    df_resid: int
+    stat: float
+    p: float
+    p_display: str
+    r_squared: float
+    adj_r_squared: float
+    aic: float
+    bic: float
+    coef_df: pd.DataFrame
+    robust_se: str = "HC3"
+    alpha: float = 0.05
+    warns: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "model_type": self.model_type,
+            "formula": self.formula,
+            "y_name": self.y_name,
+            "n_obs": self.n_obs,
+            "df_model": self.df_model,
+            "df_resid": self.df_resid,
+            "stat": self.stat,
+            "p": self.p,
+            "p_display": self.p_display,
+            "r_squared": self.r_squared,
+            "adj_r_squared": self.adj_r_squared,
+            "aic": self.aic,
+            "bic": self.bic,
+            "robust_se": self.robust_se,
+            "coefficients": self.coef_df.to_dict(orient="records"),
+            "warns": list(self.warns),
+        }
+
+    def to_df(self) -> pd.DataFrame:
+        return self.coef_df
+
+    def summary(self, format: str = "text") -> str:
+        lines = [
+            f"Model: {self.model_type} ({self.robust_se} SE)",
+            f"Formula: {self.formula}",
+            f"Observations: {self.n_obs} (df_model={self.df_model}, df_resid={self.df_resid})",
+            f"Fit: R² = {self.r_squared:.4f}, Adj R² = {self.adj_r_squared:.4f}, AIC = {self.aic:.2f}, BIC = {self.bic:.2f}",
+            f"Omnibus Statistic: {self.stat:.4f} ({self.p_display})",
+            "",
+            "Coefficients:",
+            self.coef_df.to_string(index=False),
+        ]
+        if self.warns:
+            lines.append("\nDiagnostics & Warnings:")
+            for w in self.warns:
+                lines.append(f"  ⚠️ {w}")
+        return "\n".join(lines)
+
+    def _repr_html_(self) -> str:
+        sig = self.p < self.alpha
+        badge = ("Significant Fit", "#10b981") if sig else ("Non-Significant", "#6b7280")
+        metrics = [
+            ("R² / Pseudo-R²", f"{self.r_squared:.4f}"),
+            ("Adj. R²", f"{self.adj_r_squared:.4f}"),
+            ("Omnibus p", self.p_display),
+            ("N", str(self.n_obs)),
+        ]
+        return format_html_card(
+            title=f"{self.model_type}: {self.formula}",
+            subtitle=f"Standard Errors: {self.robust_se} | AIC: {self.aic:.1f} | BIC: {self.bic:.1f}",
+            metrics=metrics,
+            badge=badge,
+            warnings=self.warns,
+        )
+
+    def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
+        from rich.panel import Panel
+
+        yield Panel(self.summary(), title=f"[bold]{self.model_type}[/bold]", border_style="green")
