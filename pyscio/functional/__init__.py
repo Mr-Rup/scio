@@ -10,6 +10,7 @@ Canonical usage:
 
 from __future__ import annotations
 
+from pyscio.core.types import CorrelationResult, TOSTResult
 from pyscio.functional.adjust import (
     bonferroni,
     fdr_bh,
@@ -29,6 +30,7 @@ from pyscio.functional.checks import (
     sarle_bimodality,
     shapiro,
 )
+from pyscio.functional.correlation import pearson_r, spearman_r
 from pyscio.functional.effects import (
     OddsRatioResult,
     cliffs_d,
@@ -81,68 +83,72 @@ from pyscio.functional.tests import (
 )
 
 __all__ = [
-    # Continuous parametric tests
-    "student_t",
-    "welch_t",
-    "paired_t",
-    "one_sample_t",
-    "anova",
-    "welch_anova",
-    "TTestResult",
     "ANOVAResult",
-    # Non-parametric tests
-    "mann_whitney",
-    "wilcoxon",
-    "kruskal",
+    "ChiSqResult",
+    "CorrelationResult",
+    "FisherResult",
+    "HomoscedasticityResult",
     "NonParametricResult",
+    "NormalityResult",
+    "OddsRatioResult",
+    "TOSTResult",
+    "TTestResult",
+    "anova",
+    "bartlett",
+    "bonferroni",
+    "bootstrap_ci",
+    "check_normality",
+    "check_pathology",
     # Categorical contingency tests
     "chisq",
-    "fisher",
-    "ChiSqResult",
-    "FisherResult",
-    # Assumption checks & pathology guards
-    "shapiro",
-    "dagostino",
-    "check_normality",
-    "levene",
-    "bartlett",
-    "iqr_bounds",
-    "sarle_bimodality",
-    "check_pathology",
-    "NormalityResult",
-    "HomoscedasticityResult",
+    "cliffs_d",
+    "cliffs_d_ci",
     # Effect sizes & exact CIs
     "cohen_d",
     "cohen_d_ci",
+    "cramers_v",
+    "dagostino",
+    "dunn",
+    "eps_sq",
+    "eta_sq",
+    # Multiple testing & power
+    "fdr_bh",
+    "fisher",
+    "games_howell",
     "hedges_g",
     "hedges_g_ci",
-    "cliffs_d",
-    "cliffs_d_ci",
-    "rank_biserial",
-    "eta_sq",
-    "eps_sq",
-    "cramers_v",
-    "odds_ratio",
+    "holm",
+    "huber_location",
     "interpret_effect",
-    "OddsRatioResult",
-    # Post-hoc pairwise tests
-    "tukey",
-    "games_howell",
-    "dunn",
-    # Resampling & equivalence
+    "iqr_bounds",
+    "kruskal",
+    "levene",
+    # Non-parametric tests
+    "mann_whitney",
+    "odds_ratio",
+    "one_sample_t",
+    "paired_t",
+    # Resampling, correlation & equivalence
+    "pearson_r",
     "permutation_test",
-    "bootstrap_ci",
+    "power_anova",
+    "power_t",
+    "rank_biserial",
+    "sarle_bimodality",
+    # Assumption checks & pathology guards
+    "shapiro",
+    "spearman_r",
+    # Continuous parametric tests
+    "student_t",
     "tost",
     # Robust statistics
     "trimmed_mean",
+    # Post-hoc pairwise tests
+    "tukey",
+    "welch_anova",
+    "welch_t",
+    "wilcoxon",
     "winsorized_mean",
     "winsorized_var",
-    "huber_location",
     "yuen_t",
-    # Multiple testing & power
-    "fdr_bh",
-    "bonferroni",
-    "holm",
-    "power_t",
-    "power_anova",
 ]

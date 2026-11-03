@@ -8,38 +8,49 @@ import numpy as np
 from scipy import stats
 from scipy.stats import mstats
 
+from pyscio.core.errors import StatError
 from pyscio.core.guards import check_groups, check_sample_size, clean_1d
-from pyscio.functional.tests import TTestResult
+from pyscio.core.types import TTestResult
 
 
-def trimmed_mean(x: np.ndarray | list[float], proportiontocut: float = 0.1) -> float:
+def trimmed_mean(
+    x: np.ndarray | list[float],
+    trim: float = 0.1,
+    *,
+    proportiontocut: float | None = None,
+) -> float:
     """Compute the symmetrically trimmed sample mean."""
+    if proportiontocut is not None:
+        trim = proportiontocut
     arr = clean_1d(x, name="x")
-    if not (0.0 <= proportiontocut < 0.5):
-        raise ValueError("proportiontocut must be in [0.0, 0.5).")
-    return float(stats.trim_mean(arr, proportiontocut=proportiontocut))
+    if not (0.0 <= trim < 0.5):
+        raise StatError(f"trim proportion must be in [0.0, 0.5), got {trim}.")
+    return float(stats.trim_mean(arr, proportiontocut=trim))
 
 
 def winsorized_mean(
     x: np.ndarray | list[float],
-    limits: tuple[float, float] | float = (0.1, 0.1),
+    trim: float = 0.1,
+    *,
+    limits: tuple[float, float] | float | None = None,
     proportiontocut: float | None = None,
 ) -> float:
     """Compute the Winsorized sample mean by clamping extreme tails."""
     arr = clean_1d(x, name="x")
     if proportiontocut is not None:
         lim: tuple[float, float] = (float(proportiontocut), float(proportiontocut))
-    elif isinstance(limits, (int, float)):
-        lim = (float(limits), float(limits))
+    elif limits is not None:
+        lim = (float(limits), float(limits)) if isinstance(limits, (int, float)) else limits
     else:
-        lim = limits
+        lim = (float(trim), float(trim))
     w = mstats.winsorize(arr, limits=lim)
     return float(np.mean(w))
 
 
-def winsorized_var(x: np.ndarray, trim: float = 0.2) -> float:
+def winsorized_var(x: np.ndarray | list[float], trim: float = 0.2) -> float:
     """Compute the sample Winsorized variance (ddof=1)."""
-    w = np.asarray(mstats.winsorize(x, limits=(trim, trim)), dtype=np.float64)
+    arr = clean_1d(x, name="x")
+    w = np.asarray(mstats.winsorize(arr, limits=(trim, trim)), dtype=np.float64)
     return float(np.var(w, ddof=1))
 
 
@@ -49,13 +60,7 @@ def huber_location(
     max_iter: int = 50,
     tol: float = 1e-6,
 ) -> tuple[float, float]:
-    """Compute Huber's M-estimator of location and MAD-normalized scale via IRLS.
-
-    Returns
-    -------
-    tuple[float, float]
-        (huber_location, mad_scale)
-    """
+    """Compute Huber's M-estimator of location and MAD-normalized scale via IRLS."""
     arr = clean_1d(x, name="x")
     check_sample_size(arr, min_n=3, name="x")
     med = float(np.median(arr))
@@ -89,29 +94,25 @@ def yuen_t(
     alternative: str = "two-sided",
     conf_level: float = 0.95,
 ) -> TTestResult:
-    """Yuen-Welch trimmed two-sample t-test for heavy-tailed and skewed distributions.
-
-    Uses trimmed means and Winsorized variances with Yuen-Welch degrees of freedom.
-    """
+    """Yuen-Welch trimmed two-sample t-test for heavy-tailed and skewed distributions."""
     if not (0.0 <= trim < 0.5):
-        raise ValueError("trim proportion must be in [0.0, 0.5).")
+        raise StatError(f"trim proportion must be in [0.0, 0.5), got {trim}.")
 
     g1 = clean_1d(a, name="sample_a")
     g2 = clean_1d(b, name="sample_b")
     check_groups(g1, g2, min_n=5)
 
     n1, n2 = len(g1), len(g2)
-    g1_cut = int(math.floor(trim * n1))
-    g2_cut = int(math.floor(trim * n2))
+    g1_cut = math.floor(trim * n1)
+    g2_cut = math.floor(trim * n2)
 
-    # Effective sample sizes after trimming both tails
     h1 = n1 - 2 * g1_cut
     h2 = n2 - 2 * g2_cut
     if h1 < 2 or h2 < 2:
-        raise ValueError("Sample size too small for the requested trimming proportion.")
+        raise StatError("Sample size too small for the requested trimming proportion.")
 
-    tm1 = trimmed_mean(g1, proportiontocut=trim)
-    tm2 = trimmed_mean(g2, proportiontocut=trim)
+    tm1 = trimmed_mean(g1, trim=trim)
+    tm2 = trimmed_mean(g2, trim=trim)
     diff = tm1 - tm2
 
     wv1 = winsorized_var(g1, trim=trim)
