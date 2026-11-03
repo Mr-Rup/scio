@@ -125,7 +125,7 @@ def format_markdown_table(headers: list[str], rows: list[list[Any]]) -> str:
     data_lines = [
         "| " + " | ".join(r[i].ljust(widths[i]) for i in range(len(r))) + " |" for r in str_rows
     ]
-    return "\n".join([header_line, sep_line] + data_lines)
+    return "\n".join([header_line, sep_line, *data_lines])
 
 
 def format_latex_table(

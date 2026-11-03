@@ -14,20 +14,20 @@ from pyscio.eda.rel import (
 from pyscio.eda.roles import Role, classify, classify_series
 
 __all__ = [
-    # Ingestion
-    "read",
-    # Profiling & Report
-    "profile",
-    "profile_column",
     # Semantic Classification
     "Role",
-    "classify",
-    "classify_series",
     # Quality Scoring & Rules
     "audit_quality",
+    "classify",
+    "classify_series",
     # Relationships & Associations
     "correlations",
     "cramers_matrix",
-    "vif",
     "missingness_correlation",
+    # Profiling & Report
+    "profile",
+    "profile_column",
+    # Ingestion
+    "read",
+    "vif",
 ]

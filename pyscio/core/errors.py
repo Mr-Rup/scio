@@ -1,4 +1,4 @@
-"""Typed domain exceptions for pyscio."""
+"""Typed domain exceptions and warning classes for pyscio."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ class ScioError(Exception):
     """Base exception for all errors raised within pyscio."""
 
 
-class StatError(ScioError):
+class StatError(ScioError, ValueError):
     """Base exception for statistical calculation, inference, and routing errors."""
 
 
@@ -31,7 +31,7 @@ class ZeroVarError(StatError):
         self.sample_name: str | None = sample_name
 
 
-class DtypeError(ScioError):
+class DtypeError(ScioError, TypeError):
     """Raised when an array or column has a data type incompatible with the requested operation."""
 
     def __init__(
@@ -53,5 +53,21 @@ class AssumptionError(StatError):
         self.p_value: float | None = p_value
 
 
-class MissingDataError(ScioError):
+class MissingDataError(ScioError, ValueError):
     """Raised when missing values violate constraints or drop operations leave zero observations."""
+
+
+class ScioWarning(UserWarning):
+    """Base warning category for pyscio statistical and diagnostic alerts."""
+
+
+class LowPowerWarning(ScioWarning):
+    """Emitted when sample size is small (3 <= N < 15), indicating high Type II error risk."""
+
+
+class AssumptionWarning(ScioWarning):
+    """Emitted when asymptotic statistical assumptions are borderline."""
+
+
+class ConvergenceWarning(ScioWarning):
+    """Emitted when an iterative solver (IRLS, root-finding) fails to converge within max_iter."""

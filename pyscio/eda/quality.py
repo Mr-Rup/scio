@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from pyscio.eda.roles import Role, classify
+from pyscio.core.roles import Role, classify
 
 
 def audit_quality(df: pd.DataFrame) -> tuple[float, list[str]]:

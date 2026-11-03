@@ -10,10 +10,10 @@ import pandas as pd
 from scipy import stats
 
 from pyscio.core.results import ColProfile, EDAReport
+from pyscio.core.roles import Role, classify
 from pyscio.eda.io import read
 from pyscio.eda.quality import audit_quality
 from pyscio.eda.rel import correlations, missingness_correlation
-from pyscio.eda.roles import Role, classify
 
 
 def profile_column(s: pd.Series, role: Role) -> ColProfile:

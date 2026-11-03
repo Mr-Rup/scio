@@ -1,19 +1,34 @@
-"""Core data structures, exceptions, validation guards, and formatters for pyscio."""
+"""Core data structures, exceptions, validation guards, roles, and formatters for pyscio."""
 
 from __future__ import annotations
 
 from pyscio.core.base import BaseResult
+from pyscio.core.constants import (
+    CLT_MAX_KURT,
+    CLT_MAX_SKEW,
+    CLT_MIN_N,
+    EPSILON,
+    LOW_POWER_THRESHOLD,
+    PATHOLOGY_BIMODALITY_MAX,
+    PATHOLOGY_EXTREME_OUTLIER_MAX,
+    PATHOLOGY_TAIL_RATIO_MAX,
+    PATHOLOGY_TIE_THRESHOLD,
+    SMALL_SAMPLE_HEDGES_N,
+)
 from pyscio.core.errors import (
     AssumptionError,
+    AssumptionWarning,
+    ConvergenceWarning,
     DtypeError,
+    LowPowerWarning,
     MissingDataError,
     SampleSizeError,
     ScioError,
+    ScioWarning,
     StatError,
     ZeroVarError,
 )
 from pyscio.core.guards import (
-    EPSILON,
     check_groups,
     check_low_power,
     check_paired,
@@ -30,31 +45,74 @@ from pyscio.core.results import (
     ScreenReport,
     TestResult,
 )
+from pyscio.core.roles import Role, classify, classify_series
+from pyscio.core.types import (
+    Alternative,
+    ANOVAResult,
+    ChiSqResult,
+    CorrelationResult,
+    FisherResult,
+    HomoscedasticityResult,
+    NonParametricResult,
+    NormalityResult,
+    OddsRatioResult,
+    TOSTResult,
+    TTestResult,
+)
 
 __all__ = [
+    "CLT_MAX_KURT",
+    "CLT_MAX_SKEW",
+    "CLT_MIN_N",
+    # Constants & guards
+    "EPSILON",
+    "LOW_POWER_THRESHOLD",
+    "PATHOLOGY_BIMODALITY_MAX",
+    "PATHOLOGY_EXTREME_OUTLIER_MAX",
+    "PATHOLOGY_TAIL_RATIO_MAX",
+    "PATHOLOGY_TIE_THRESHOLD",
+    "SMALL_SAMPLE_HEDGES_N",
+    "ANOVAResult",
+    # Types
+    "Alternative",
+    "AssumptionError",
+    "AssumptionWarning",
     # Base and exceptions
     "BaseResult",
-    "ScioError",
-    "StatError",
-    "SampleSizeError",
-    "ZeroVarError",
-    "DtypeError",
-    "AssumptionError",
-    "MissingDataError",
-    # Guards and clamps
-    "EPSILON",
-    "clamp_p",
-    "clean_1d",
-    "check_sample_size",
-    "check_variance",
-    "check_groups",
-    "check_paired",
-    "check_low_power",
     # Results
     "CheckResult",
-    "TestResult",
-    "RegressionResult",
+    "ChiSqResult",
     "ColProfile",
+    "ConvergenceWarning",
+    "CorrelationResult",
+    "DtypeError",
     "EDAReport",
+    "FisherResult",
+    "HomoscedasticityResult",
+    "LowPowerWarning",
+    "MissingDataError",
+    "NonParametricResult",
+    "NormalityResult",
+    "OddsRatioResult",
+    "RegressionResult",
+    # Roles
+    "Role",
+    "SampleSizeError",
+    "ScioError",
+    "ScioWarning",
     "ScreenReport",
+    "StatError",
+    "TOSTResult",
+    "TTestResult",
+    "TestResult",
+    "ZeroVarError",
+    "check_groups",
+    "check_low_power",
+    "check_paired",
+    "check_sample_size",
+    "check_variance",
+    "clamp_p",
+    "classify",
+    "classify_series",
+    "clean_1d",
 ]

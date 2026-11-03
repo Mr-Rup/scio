@@ -7,7 +7,7 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
-from pyscio.eda.roles import Role, classify
+from pyscio.core.roles import Role, classify
 from pyscio.functional.effects import cramers_v
 
 
