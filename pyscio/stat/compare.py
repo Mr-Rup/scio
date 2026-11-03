@@ -10,11 +10,12 @@ import pandas as pd
 
 from pyscio.core.errors import MissingDataError, StatError
 from pyscio.core.results import TestResult
-from pyscio.eda.roles import Role, classify_series
+from pyscio.core.roles import Role, classify_series
 from pyscio.functional.effects import interpret_effect
-from pyscio.stat.regression import _clean_var_name, extract_formula_vars, logistic, ols
+from pyscio.models import _clean_var_name, extract_formula_vars, logistic, ols
 from pyscio.stat.router import (
     route_contingency,
+    route_correlation,
     route_independent_two_sample,
     route_k_sample,
     route_one_sample,
@@ -159,16 +160,29 @@ def compare(
                 alternative=alternative,
             )
 
+        # Continuous Numeric vs Continuous Numeric: Correlation Test (Pearson r / Spearman rho)
+        if role_x == Role.NUMERIC and role_y == Role.NUMERIC:
+            sub = df[[col_x, col_y]].dropna()
+            if len(sub) < 3:
+                raise MissingDataError(
+                    f"Insufficient paired observations (N={len(sub)}) between '{col_x}' and '{col_y}'."
+                )
+            return route_correlation(
+                sub[col_x].to_numpy(dtype=np.float64),
+                sub[col_y].to_numpy(dtype=np.float64),
+                x_name=col_x,
+                y_name=col_y,
+                alpha=alpha,
+            )
+
         # Categorical vs Categorical: 2D Contingency Table
-        if role_x in (Role.CATEGORICAL, Role.BINARY, Role.DISCRETE) and role_y in (
-            Role.CATEGORICAL,
-            Role.BINARY,
-            Role.DISCRETE,
+        if (
+            role_x in (Role.CATEGORICAL, Role.BINARY, Role.DISCRETE)
+            and role_y in (Role.CATEGORICAL, Role.BINARY, Role.DISCRETE)
+            and not (pd.api.types.is_numeric_dtype(df[col_y]) and df[col_y].nunique() > 10)
         ):
-            # If both are numeric discrete with many values, defer to group comparison
-            if not (pd.api.types.is_numeric_dtype(df[col_y]) and df[col_y].nunique() > 10):
-                crosstab = pd.crosstab(df[col_x], df[col_y])
-                return route_contingency(crosstab, x_name=col_x, y_name=col_y, alpha=alpha)
+            crosstab = pd.crosstab(df[col_x], df[col_y])
+            return route_contingency(crosstab, x_name=col_x, y_name=col_y, alpha=alpha)
 
         # Grouping comparison: target outcome `y` grouped by independent variable `x`
         # If user passed x=target (numeric) and y=group (categorical), auto-orient

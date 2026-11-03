@@ -9,7 +9,7 @@ import pandas as pd
 
 from pyscio.core.errors import ScioError
 from pyscio.core.results import ScreenReport, TestResult
-from pyscio.eda.roles import Role, classify
+from pyscio.core.roles import Role, classify
 from pyscio.functional.adjust import fdr_bh
 from pyscio.stat.compare import compare
 

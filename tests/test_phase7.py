@@ -234,6 +234,17 @@ class TestPillar4FormulaAndRegression:
         assert res_multi.posthoc is not None
         assert "coef" in res_multi.posthoc.columns
 
+    def test_compare_numeric_vs_numeric_correlation(self) -> None:
+        rng = np.random.default_rng(808)
+        x = rng.normal(0.0, 1.0, 60)
+        y = 2.5 * x + rng.normal(0.0, 0.5, 60)
+        df = pd.DataFrame({"x": x, "y": y})
+
+        res = sc.compare(df, x="x", y="y")
+        assert res.test_name == "Pearson Correlation Test"
+        assert res.effect is not None and res.effect > 0.85
+        assert res.effect_ci is not None and res.effect_ci[0] > 0.70
+
 
 class TestResamplingAndRobust:
     """Verify permutation tests, BCa bootstrap CIs, TOST equivalence, and robust statistics."""
