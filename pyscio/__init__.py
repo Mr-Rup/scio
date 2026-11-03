@@ -7,6 +7,7 @@ Canonical imports:
 
 from __future__ import annotations
 
+import importlib
 from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING, Any
 
@@ -15,7 +16,7 @@ from pyscio.accessor import register_accessor
 if TYPE_CHECKING:
     from pyscio import core, eda, functional, models, stat
     from pyscio.eda import read
-    from pyscio.stat import compare, logistic, ols, screen, tost
+    from pyscio.stat import compare, logistic, ols, screen, solve_power, tost
 
     F = functional
 
@@ -39,41 +40,32 @@ __all__ = [
     "ols",
     "read",
     "screen",
+    "solve_power",
     "stat",
     "tost",
 ]
 
 
 def __getattr__(name: str) -> Any:
-    """Lazy PEP 562 module attribute loader for fast package startup."""
+    """Lazy PEP 562 module attribute loader with globals() caching for zero repeat overhead."""
     if name in ("F", "functional"):
-        from pyscio import functional
-
-        return functional
-    if name == "core":
-        from pyscio import core
-
-        return core
-    if name == "models":
-        from pyscio import models
-
-        return models
-    if name == "eda":
-        from pyscio import eda
-
-        return eda
-    if name == "stat":
-        from pyscio import stat
-
-        return stat
+        mod = importlib.import_module("pyscio.functional")
+        globals()[name] = mod
+        return mod
+    if name in ("core", "models", "eda", "stat"):
+        mod = importlib.import_module(f"pyscio.{name}")
+        globals()[name] = mod
+        return mod
     if name == "read":
-        from pyscio.eda import read
-
-        return read
-    if name in ("compare", "screen", "ols", "logistic", "tost"):
-        from pyscio import stat
-
-        return getattr(stat, name)
+        eda_mod = importlib.import_module("pyscio.eda")
+        val = eda_mod.read
+        globals()[name] = val
+        return val
+    if name in ("compare", "screen", "ols", "logistic", "tost", "solve_power"):
+        stat_mod = importlib.import_module("pyscio.stat")
+        val = getattr(stat_mod, name)
+        globals()[name] = val
+        return val
     raise AttributeError(f"module 'pyscio' has no attribute '{name}'")
 
 

@@ -7,6 +7,7 @@ from typing import NamedTuple
 import numpy as np
 from scipy import stats
 
+from pyscio.core.errors import StatError
 from pyscio.core.guards import clean_1d
 
 
@@ -31,20 +32,7 @@ class HomoscedasticityResult(NamedTuple):
 
 
 def shapiro(x: np.ndarray | list[float], alpha: float = 0.05) -> NormalityResult:
-    """Perform Shapiro-Wilk test for normality ($N \\le 5000$).
-
-    Parameters
-    ----------
-    x : array-like
-        1D sample data.
-    alpha : float
-        Significance threshold (default 0.05).
-
-    Returns
-    -------
-    NormalityResult
-        NamedTuple with test statistic, p-value, is_normal boolean, and sample moments.
-    """
+    """Perform Shapiro-Wilk test for normality ($N \\le 5000$)."""
     arr = clean_1d(x, name="x")
     res = stats.shapiro(arr)
     stat, p = float(res.statistic), float(res.pvalue)
@@ -100,7 +88,7 @@ def levene(
     """
     cleaned = [clean_1d(g, name=f"group_{i}") for i, g in enumerate(groups)]
     if len(cleaned) < 2:
-        raise ValueError("Levene test requires at least 2 groups.")
+        raise StatError("Levene test requires at least 2 groups.")
 
     res = stats.levene(*cleaned, center=center)
     stat, p = float(res.statistic), float(res.pvalue)
@@ -117,7 +105,7 @@ def bartlett(*groups: np.ndarray | list[float], alpha: float = 0.05) -> Homosced
     """Perform Bartlett's test for homoscedasticity across normally distributed groups."""
     cleaned = [clean_1d(g, name=f"group_{i}") for i, g in enumerate(groups)]
     if len(cleaned) < 2:
-        raise ValueError("Bartlett test requires at least 2 groups.")
+        raise StatError("Bartlett test requires at least 2 groups.")
 
     res = stats.bartlett(*cleaned)
     stat, p = float(res.statistic), float(res.pvalue)
@@ -140,7 +128,12 @@ def iqr_bounds(x: np.ndarray | list[float], k: float = 1.5) -> tuple[float, floa
     return lower_bound, upper_bound, outliers_count
 
 
-def sarle_bimodality(x: np.ndarray | list[float]) -> float:
+def sarle_bimodality(
+    x: np.ndarray | list[float],
+    *,
+    skewness: float | None = None,
+    excess_kurtosis: float | None = None,
+) -> float:
     """Compute Sarle's Bimodality Coefficient (BC).
 
     $$BC = \\frac{\\gamma_1^2 + 1}{\\gamma_2 + 3 \\cdot \\frac{(n - 1)^2}{(n - 2)(n - 3)}}$$
@@ -151,8 +144,12 @@ def sarle_bimodality(x: np.ndarray | list[float]) -> float:
     n = len(arr)
     if n < 4:
         return 0.0
-    skew = float(stats.skew(arr, bias=False))
-    kurt = float(stats.kurtosis(arr, bias=False))
+    skew = float(stats.skew(arr, bias=False)) if skewness is None else float(skewness)
+    kurt = (
+        float(stats.kurtosis(arr, bias=False))
+        if excess_kurtosis is None
+        else float(excess_kurtosis)
+    )
     denom = kurt + 3.0 * ((n - 1.0) ** 2) / ((n - 2.0) * (n - 3.0))
     if denom <= 1e-12:
         return 0.0
@@ -164,19 +161,11 @@ def check_pathology(
     tie_threshold: float = 0.30,
     tail_ratio_max: float = 2.2,
     bimodality_max: float = 0.555,
+    *,
+    skewness: float | None = None,
+    excess_kurtosis: float | None = None,
 ) -> tuple[bool, list[str]]:
-    """Detect distributional pathologies where moment-based CLT and Levene guards fail.
-
-    Screens for:
-    1. Point-mass / zero-inflation (maximum single-value tie density >= tie_threshold).
-    2. Heavy-tailed / Cauchy-like regimes (SD / (IQR / 1.34898) > tail_ratio_max or > 2% extreme outliers).
-    3. Bimodal / multimodal regimes (Sarle's BC > bimodality_max with negative excess kurtosis).
-
-    Returns
-    -------
-    tuple[bool, list[str]]
-        (has_pathology, reasons)
-    """
+    """Detect distributional pathologies where moment-based CLT and Levene guards fail."""
     arr = clean_1d(x, name="x")
     n = len(arr)
     if n < 4:
@@ -207,9 +196,13 @@ def check_pathology(
                 f"Heavy-tailed/outlier regime (tail scale ratio={tail_ratio:.2f}, extreme outliers={extreme_prop * 100:.1f}%)"
             )
 
-    # 3. Bimodal / multimodal check via Sarle's BC
-    kurt = float(stats.kurtosis(arr, bias=False))
-    bc = sarle_bimodality(arr)
+    # 3. Bimodal / multimodal check via Sarle's BC (reuses precomputed moments when supplied)
+    kurt = (
+        float(stats.kurtosis(arr, bias=False))
+        if excess_kurtosis is None
+        else float(excess_kurtosis)
+    )
+    bc = sarle_bimodality(arr, skewness=skewness, excess_kurtosis=kurt)
     if bc > bimodality_max and kurt < -0.5:
         reasons.append(f"Bimodal/multimodal regime (Sarle's BC={bc:.3f} > {bimodality_max})")
 

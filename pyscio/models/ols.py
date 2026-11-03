@@ -1,4 +1,4 @@
-"""Ordinary Least Squares (OLS) regression with HC0-HC3 heteroscedasticity-robust SEs."""
+"""Ordinary Least Squares (OLS) regression with QR decomposition and HC0-HC3 robust SEs."""
 
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ from pyscio.models.formula import parse_formula
 def ols(
     df: pd.DataFrame,
     formula: str,
-    robust_se: str | None = "HC3",
+    robust_se: str | bool | None = "HC3",
     alpha: float = 0.05,
 ) -> RegressionResult:
-    """Fit Ordinary Least Squares (OLS) regression with MacKinnon-White HC3 robust standard errors."""
+    """Fit Ordinary Least Squares (OLS) regression via QR decomposition with HC0-HC3 robust SEs."""
     y_name, y, term_names, x_mat = parse_formula(df, formula)
     n, p = x_mat.shape
     if n <= p:
@@ -30,13 +30,21 @@ def ols(
     has_intercept = "Intercept" in term_names
     df_model = float(p - 1 if has_intercept else p)
 
-    beta, _, rank, _ = np.linalg.lstsq(x_mat, y, rcond=None)
+    # Reduced QR decomposition: X = Q R, where Q is (n, p) orthonormal and R is (p, p) upper triangular
+    q_mat, r_mat = np.linalg.qr(x_mat, mode="reduced")
+    diag_r = np.abs(np.diag(r_mat))
+    tol = max(n, p) * np.finfo(np.float64).eps * (float(np.max(diag_r)) if len(diag_r) > 0 else 1.0)
+    rank = int(np.sum(diag_r > tol))
     if rank < p:
         raise StatError(
             f"Design matrix is rank-deficient (rank={rank} < {p} columns); check for collinearity."
         )
 
-    y_hat = x_mat @ beta
+    r_inv = np.linalg.inv(r_mat)
+    beta = r_inv @ (q_mat.T @ y)
+    xtx_inv = r_inv @ r_inv.T
+
+    y_hat = q_mat @ (q_mat.T @ y)
     resid = y - y_hat
 
     rss = float(np.sum(resid**2))
@@ -49,12 +57,18 @@ def ols(
         else 0.0
     )
 
-    xtx_inv = np.linalg.pinv(x_mat.T @ x_mat)
     sigma2 = rss / df_resid
 
-    se_mode = robust_se.upper() if robust_se is not None else "NONROBUST"
+    if isinstance(robust_se, bool):
+        se_mode = "HC3" if robust_se else "NONROBUST"
+    elif robust_se is None:
+        se_mode = "NONROBUST"
+    else:
+        se_mode = robust_se.upper()
+
     if se_mode in ("HC0", "HC1", "HC2", "HC3"):
-        h_diag = np.einsum("ij,ij->i", x_mat @ xtx_inv, x_mat)
+        # Leverage h_ii = sum_j Q_{ij}^2 in O(N p) without materializing N x N hat matrix
+        h_diag = np.sum(q_mat**2, axis=1)
         if se_mode == "HC3":
             omega = (resid**2) / (np.maximum(1.0 - h_diag, 1e-6) ** 2)
         elif se_mode == "HC2":
@@ -66,9 +80,11 @@ def ols(
         meat = x_mat.T @ (x_mat * omega[:, None])
         cov_beta = xtx_inv @ meat @ xtx_inv
         model_label = f"OLS Regression ({se_mode} Robust SE)"
+        se_label = se_mode
     else:
         cov_beta = sigma2 * xtx_inv
         model_label = "OLS Regression (Classical SE)"
+        se_label = "Non-Robust"
 
     se_beta = np.sqrt(np.maximum(np.diag(cov_beta), 1e-30))
     t_stats = beta / se_beta
@@ -119,6 +135,6 @@ def ols(
         aic=aic,
         bic=bic,
         coef_df=coef_df,
-        robust_se=robust_se if robust_se is not None else "Non-Robust",
+        robust_se=se_label,
         alpha=alpha,
     )

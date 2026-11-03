@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from pyscio.core.constants import CLT_MAX_KURT, CLT_MAX_SKEW, CLT_MIN_N, SMALL_SAMPLE_HEDGES_N
+from pyscio.core.constants import SMALL_SAMPLE_HEDGES_N
 from pyscio.core.guards import (
     check_groups,
     check_low_power,
@@ -15,7 +15,7 @@ from pyscio.core.guards import (
     clean_1d,
 )
 from pyscio.core.results import CheckResult, TestResult
-from pyscio.functional.checks import check_normality, check_pathology, levene
+from pyscio.functional.checks import levene
 from pyscio.functional.correlation import pearson_r, spearman_r
 from pyscio.functional.effects import (
     cliffs_d,
@@ -34,53 +34,7 @@ from pyscio.functional.tests import (
     welch_t,
     wilcoxon,
 )
-
-
-def evaluate_normality_with_clt(
-    arr: np.ndarray,
-    name: str = "sample",
-    alpha: float = 0.05,
-) -> tuple[bool, CheckResult]:
-    """Check normality with the Large-N Central Limit Theorem (CLT) and Pathology guards."""
-    n_res = check_normality(arr, alpha=alpha)
-    n = len(arr)
-    skew = abs(n_res.skewness)
-    kurt = abs(n_res.excess_kurtosis)
-
-    has_path, path_reasons = check_pathology(arr)
-    clt_holds = n >= CLT_MIN_N and skew < CLT_MAX_SKEW and kurt < CLT_MAX_KURT and not has_path
-
-    if n_res.is_normal and not has_path:
-        passed = True
-        details = f"{n_res.test_used}: p={n_res.p:.4g} >= {alpha}"
-        clt_note = None
-    elif clt_holds:
-        passed = True
-        details = (
-            f"{n_res.test_used} rejected (p={n_res.p:.4g}), but N={n:,} >= {CLT_MIN_N}, "
-            f"skewness={n_res.skewness:.2f}, kurtosis={n_res.excess_kurtosis:.2f}"
-        )
-        clt_note = (
-            "Central Limit Theorem holds (N >= 500, moderate skew/kurtosis); parametric test robust"
-        )
-    else:
-        passed = False
-        path_suffix = f"; pathology: {', '.join(path_reasons)}" if has_path else ""
-        details = (
-            f"{n_res.test_used} rejected (p={n_res.p:.4g} < {alpha}, "
-            f"skewness={n_res.skewness:.2f}, kurtosis={n_res.excess_kurtosis:.2f}{path_suffix})"
-        )
-        clt_note = None
-
-    check = CheckResult(
-        name=f"Normality ({name})",
-        stat=n_res.stat,
-        p=n_res.p,
-        passed=passed,
-        details=details,
-        clt_note=clt_note,
-    )
-    return passed, check
+from pyscio.stat.router.normality import evaluate_normality_with_clt
 
 
 def route_independent_two_sample(
@@ -152,7 +106,7 @@ def route_independent_two_sample(
         dof = None
         ci = None
         eff_val = cliffs_d(arr1, arr2)
-        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha)
+        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha, delta=eff_val)
         metric = "Cliff's delta"
         magnitude = interpret_effect("cliff", eff_val)
 
@@ -228,7 +182,7 @@ def route_paired_two_sample(
         dof = None
         ci = None
         eff_val = cliffs_d(arr1, arr2)
-        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha)
+        eff_ci = cliffs_d_ci(arr1, arr2, conf_level=1.0 - alpha, delta=eff_val)
         metric = "Rank-biserial r"
         magnitude = interpret_effect("cliff", eff_val)
 
