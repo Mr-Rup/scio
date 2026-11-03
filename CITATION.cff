@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "pyscio: Autonomous Statistical Inference Engine, One-Tap EDA, and Pure Numerical Hypothesis Testing"
+message: "If you use pyscio in your research or software, please cite it using the metadata below."
+type: software
+authors:
+  - alias: "Mr-Rup"
+    email: "majumdarb107@gmail.com"
+repository-code: "https://github.com/Mr-Rup/scio"
+url: "https://mr-rup.github.io/scio/"
+license: Apache-2.0
+keywords:
+  - statistics
+  - hypothesis-testing
+  - exploratory-data-analysis
+  - effect-sizes
+  - python
+  - econometrics
+  - biostatistics

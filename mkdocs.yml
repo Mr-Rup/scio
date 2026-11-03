@@ -1,0 +1,45 @@
+site_name: pyscio
+site_description: Autonomous Statistical Inference Engine, One-Tap EDA, and Pure Numerical Hypothesis Testing for Python
+site_url: https://mr-rup.github.io/scio/
+repo_url: https://github.com/Mr-Rup/scio
+repo_name: Mr-Rup/scio
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+    - scheme: slate
+      primary: indigo
+      accent: teal
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_root_heading: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quickstart: getting-started/quickstart.md
+  - Statistical Theory:
+      - Mathematical Rigor & Guards: theory/statistical-rigor.md
+  - API Reference:
+      - Reference Manual: api/reference.md

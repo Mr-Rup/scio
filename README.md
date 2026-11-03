@@ -7,40 +7,29 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Type Checked: mypy](https://img.shields.io/badge/type%20checked-mypy%20strict-blue.svg)](https://github.com/python/mypy)
 
-**`pyscio`** is an autonomous statistical inference engine, one-tap exploratory data analysis (EDA) suite, and pure numerical hypothesis testing framework for Python.
-
-Designed from first principles to be the modern statistical companion to **Pandas**, **NumPy**, and **PyTorch**, `pyscio` bridges the gap between raw data and statistically sound, peer-reviewed scientific conclusions.
+**`pyscio`** is an autonomous statistical inference engine, one-tap exploratory data analysis (EDA) suite, multivariate regression toolkit, and pure numerical hypothesis testing framework for Python (`>= 3.11`).
 
 ---
 
 ## ⚡ Highlights
 
-* **Pure Stateless Mathematical Kernels (`pyscio.functional` as `F`):** PyTorch-style pure NumPy/SciPy kernels (`F.welch_t`, `F.mann_whitney`, `F.tukey`, `F.cohen_d`, `F.cliffs_d`, `F.fdr_bh`) with zero classes, zero side-effects, and zero visualization dependencies.
-* **Universal Pandas EDA (`pyscio.eda`):** The comprehensive architectural evolution of [`polars-datapulse`](https://github.com/Mr-Rup/polars-datapulse) ported to a universal Pandas + NumPy engine. Includes 8-role semantic classification (`numeric`, `discrete`, `binary`, `categorical`, `temporal`, `text`, `id`, `constant`), vectorized profiling, 0–100 data quality scoring, correlation/VIF matrices, and zero-CDN standalone interactive HTML reports.
-* **One-Tap Pandas Accessor (`df.scio`):** Run full EDA, hypothesis comparisons, or multi-feature screening directly on any Pandas DataFrame with clean method chaining.
-* **Autonomous Decision Lattice:** Automatically inspects distribution shape (Shapiro-Wilk / D'Agostino $K^2$), evaluates homoscedasticity (Levene / Bartlett), checks sample constraints, and routes to the mathematically optimal test.
-* **Large-$N$ Central Limit Theorem (CLT) Guard:** Prevents statistical over-rejection on large samples ($N \ge 500$) when skewness ($|\gamma_1| < 1.0$) and kurtosis ($|\gamma_2| < 2.0$) are well-behaved, routing cleanly to Welch's $t$-test with an explicit CLT assumption audit note.
-* **$O(N \log N)$ Cliff's $\delta$:** Computes the non-parametric Cliff's $\delta$ effect size in $O((N_1 + N_2) \log(N_1 + N_2))$ time via the Mann-Whitney $U$ identity $\delta = \frac{2U}{n_1 n_2} - 1$ rather than naive $O(N_1 N_2)$ loops.
-* **Confidence Intervals & Automatic Post-Hoc Pairwise Tests:** Every hypothesis result includes exact $(1 - \alpha)$ confidence intervals. Significant $K > 2$ group tests automatically trigger Tukey HSD (ANOVA), Games-Howell (Welch's ANOVA), or Dunn's test with Holm/BH adjustment (Kruskal-Wallis).
-* **Multi-Feature Discovery Screening:** Test dozens of features against a target outcome with automatic Benjamini-Hochberg False Discovery Rate (FDR) control and an effect-size leaderboard.
-* **Zero-Config Dual Rendering:** Interactive HTML cards in Jupyter/Colab notebooks (`_repr_html_()`) and Rich tables in terminals (`__rich_console__()`).
-* **Strict R 4.3 Parity:** All statistical outputs and effect sizes are benchmarked against R golden reference vectors to $\le 10^{-6}$ numerical tolerance.
+* **Pure Stateless Mathematical Kernels (`pyscio.functional` as `F`):** PyTorch-style pure NumPy/SciPy kernels (`F.welch_t`, `F.mann_whitney`, `F.tukey`, `F.cohen_d`, `F.cliffs_d`, `F.fdr_bh`, `F.bootstrap_ci`, `F.yuen_t`) returning lightweight `NamedTuple`s with zero classes and zero side-effects.
+* **Autonomous Decision Lattice & Pathology Guards (`pyscio.stat`):** Inspects distribution shape (Shapiro-Wilk / D'Agostino $K^2$), checks for **point-mass zero-inflation**, **heavy-tailed / Cauchy regimes**, and **Sarle's bimodality ($BC > 0.555$)** before permitting a Large-$N$ ($N \ge 500$) Central Limit Theorem override, evaluates homoscedasticity (Levene / Brown-Forsythe), and routes to the mathematically optimal test.
+* **Exact Non-Central $t$ Effect Size CIs:** Computes exact Non-Central $t$-distribution confidence intervals (`F.cohen_d_ci`, `F.hedges_g_ci`) via Brent root-finding and $z$-transformed CIs for $O(N \log N)$ Cliff's $\delta$ (`F.cliffs_d_ci`), surfacing `effect_ci` on every `TestResult`.
+* **Tensor-Broadcasted Post-Hoc Pairwise Tests:** Significant $K > 2$ omnibus tests automatically trigger vectorized Tukey HSD (ANOVA), Games-Howell (Welch's ANOVA), or Dunn's test with BH/Holm adjustment (Kruskal-Wallis).
+* **Wilkinson Formulas & Robust Multivariate Models (`pyscio.models`):** Run `sc.compare(df, "y ~ x1 + C(group)")`, Ordinary Least Squares with MacKinnon-White **HC0–HC3** heteroscedasticity-robust standard errors (`sc.ols`), and Newton-Raphson IRLS binary logistic regression with Odds Ratios (`sc.logistic`).
+* **Resampling, Equivalence, & Robust Statistics:** Exact & vectorized Monte Carlo `F.permutation_test`, Bias-Corrected and Accelerated ($BC_a$) `F.bootstrap_ci`, Two One-Sided Tests for equivalence (`sc.tost`), Huber M-estimators (`F.huber_location`), and Yuen-Welch trimmed $t$-tests (`F.yuen_t`).
+* **Universal Pandas EDA (`pyscio.eda`) & Accessor (`df.scio`):** 8-role semantic column classification, vectorized profiling, 0–100 data health scoring, correlation/VIF matrices, and standalone interactive HTML reports.
 
 ---
 
 ## 📦 Installation
 
-Using `uv` (recommended):
 ```bash
 uv add pyscio
-```
-
-Using `pip`:
-```bash
+# or
 pip install pyscio
 ```
-
-Requirements: Python `>= 3.11`.
 
 ---
 
@@ -49,115 +38,81 @@ Requirements: Python `>= 3.11`.
 ### 1. One-Tap Exploratory Data Analysis (EDA)
 
 ```python
-import pandas as pd
 import pyscio as sc
 
 df = sc.read("clinical_trial.csv")  # Auto-sniffs CSV/TSV, Parquet, Excel, JSON
-
-# Generate a complete structural and quality report
 report = df.scio.eda()
-
-# Render summary to terminal
 print(report.summary())
-
-# Export a standalone, self-contained interactive HTML report
 report.to_html("eda_report.html")
 ```
 
-### 2. Autonomous Hypothesis Comparison
-
-Let `pyscio` check assumptions, test for variance homogeneity, evaluate the Central Limit Theorem, and choose the most powerful valid test:
+### 2. Autonomous Hypothesis Comparison & Wilkinson Formulas
 
 ```python
-# Compare continuous recovery days across treatment arms
+# Compare continuous outcome across treatment arms (auto-routes & computes exact effect CIs)
 result = df.scio.compare(x="treatment_arm", y="recovery_days")
+print(result.summary())
 
-# Display the rich statistical card
-result.summary()
+# Or use Wilkinson formula syntax (bivariate or multivariate ANCOVA/OLS)
+res_formula = df.scio.compare("recovery_days ~ treatment_arm + baseline_score")
 ```
 
-Output:
-```text
-┌─ Hypothesis Test Result ────────────────────────────────────────────────────────┐
-│ Target: recovery_days ~ treatment_arm                                            │
-│ Test: Welch's Two-Sample t-test (CLT Guard Active)                              │
-│ Statistic: t = 3.4812, p = 0.00062, df = 142.8                                  │
-│ 95% Confidence Interval: [1.84, 6.12]                                           │
-│ Effect Size: Hedges' g = 0.582 (Medium)                                          │
-│ Assumptions: Normality (p=0.082, OK), Homoscedasticity (p=0.014, Heteroscedastic)│
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 3. Multi-Feature Discovery Screening with FDR Control
-
-Screen all candidate biomarkers or features against an outcome in one line:
+### 3. Multivariate Regression (OLS HC3 & IRLS Logistic)
 
 ```python
-screen = df.scio.screen(y="remission")
+# Ordinary Least Squares with MacKinnon-White HC3 robust standard errors
+ols_res = sc.ols(df, "recovery_days ~ age * C(treatment_arm)", robust_se="HC3")
+print(ols_res.summary())
 
-# Print ranked discoveries with Benjamini-Hochberg q-values
-print(screen.leaderboard())
+# Binary Logistic Regression with Odds Ratios and McFadden Pseudo-R²
+log_res = sc.logistic(df, "remission ~ age + C(treatment_arm)")
 ```
 
-### 4. Pure Stateless Math Kernels (`pyscio.functional`)
-
-If you are building custom algorithms or pipelines, use `pyscio.functional` (`F`) for fast, pure, deterministic numerical kernels:
+### 4. Stateless Math Kernels (`pyscio.functional as F`)
 
 ```python
 import pyscio.functional as F
 
-# Compute Welch's t-test
-stat, p_val, dof = F.welch_t(group_a, group_b)
+# Welch's t-test returns a 6-field TTestResult NamedTuple
+res = F.welch_t(group_a, group_b)
+print(res.stat, res.p, res.dof, res.ci)
 
-# Standardized effect sizes
-d = F.cohen_d(group_a, group_b)
-delta = F.cliffs_d(group_a, group_b)  # O(N log N)
+# Effect sizes with exact Non-Central t CIs & O(N log N) Cliff's delta
+g, g_ci = F.hedges_g(group_a, group_b), F.hedges_g_ci(group_a, group_b)
+delta, d_ci = F.cliffs_d(group_a, group_b), F.cliffs_d_ci(group_a, group_b)
 
-# Multiple testing adjustments
-rejected, q_values = F.fdr_bh(p_values, alpha=0.05)
+# BCa Bootstrap CI, TOST Equivalence, & Yuen-Welch Robust Trimmed t-Test
+ci_bca = F.bootstrap_ci(group_a, n_resamples=5000, method="bca", seed=42)
+eq_res = sc.tost(group_a, group_b, bound=0.5)
+yuen_res = F.yuen_t(group_a, group_b, trim=0.2)
 ```
 
 ---
 
-## 🏛️ Architecture & Directory Layout
+## 🏛️ 5-Layer Architecture
 
 ```text
 pyscio/
 ├── pyproject.toml             # Hatchling + hatch-vcs, Python >= 3.11
-├── LICENSE                    # Apache-2.0
-├── .github/
-│   └── workflows/
-│       ├── ci.yml             # Ubuntu, macOS, Windows | Python 3.11, 3.12, 3.13
-│       └── publish.yml        # Tag v* -> PyPI OIDC Trusted Publishing
-├── tests/
-│   ├── conftest.py            # R 4.3 golden reference fixtures
-│   ├── test_core.py
-│   ├── test_functional.py
-│   ├── test_r_parity.py
-│   ├── test_eda.py
-│   └── test_stat.py
+├── mkdocs.yml                 # MkDocs-Material documentation config
+├── docs/                      # Quickstart, mathematical theory, & API reference
+├── scripts/
+│   └── check_module_size.py   # Enforces module size budgets & 5-layer import contracts
+├── tests/                     # Unit, R 4.3 parity, Hypothesis property, & API snapshot tests
 └── pyscio/
-    ├── __init__.py            # Top-level exports: read, eda, stat, F, test, compare, screen
-    ├── py.typed               # Strict PEP 561 typing marker
-    ├── accessor.py            # Pandas DataFrame .scio accessor
-    ├── core/                  # BaseResult, TestResult, CheckResult, guards, exceptions
-    ├── functional/            # Pure stateless kernels: checks, tests, effects, posthoc, adjust
-    ├── eda/                   # Pandas+NumPy DataPulse: io, roles, profile, quality, rel, view
-    ├── stat/                  # Autonomous decision lattice, router, compare, screen, power
-    └── cli/                   # Lightweight CLI runner
+    ├── __init__.py            # PEP 562 lazy exports: read, compare, screen, ols, logistic, tost, F
+    ├── __main__.py            # CLI execution (`python -m pyscio`)
+    ├── core/                  # L0: constants, errors, guards, types, roles, results/
+    ├── functional/            # L1: pure stateless kernels (checks, tests, effects, posthoc, resample, robust)
+    ├── models/                # L2: Wilkinson formula parser, OLS (HC0-HC3), IRLS Logistic
+    ├── stat/                  # L3: Autonomous router/ subpackage, compare, screen, equivalence, power
+    ├── eda/                   # L3: Multi-format I/O, profiler, quality, correlations/VIF
+    ├── integrations/          # L4: Pandas DataFrame `.scio` accessor
+    └── cli/                   # L4: Command-line interface (`pyscio`)
 ```
 
 ---
 
-## 🔬 Mathematical & Numerical Rigor Standards
+## 📄 License & Citation
 
-1. **P-Value Underflow Clamp:** All $p$-values below floating point machine epsilon (`2.220446049250313e-16`) are clamped to avoid numerical zero hazards and displayed as `p < 2.22e-16`.
-2. **Sample Size & Variance Guards:** Tests raise `SampleSizeError` for $N < 3$, emit a low-power warning for $3 \le N < 15$, and raise `ZeroVarError` when variance is zero.
-3. **Dual Representation:** Every result container implements `_repr_html_()` for Jupyter/Colab notebooks and `__rich_console__()` for Rich terminal sessions.
-4. **R 4.3 Parity:** Verified against R `stats` golden vectors across Student's $t$, Welch's $t$, Mann-Whitney $U$, Wilcoxon, ANOVA, Kruskal-Wallis, $\chi^2$, and Fisher's Exact Test.
-
----
-
-## 📄 License
-
-Distributed under the terms of the [Apache License, Version 2.0](LICENSE).
+Distributed under the [Apache License, Version 2.0](LICENSE). See [`CITATION.cff`](CITATION.cff) for academic citation metadata.
