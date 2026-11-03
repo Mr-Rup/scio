@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint & Style (${{ matrix.os }} - Py${{ matrix.python-version }})
+    name: Lint, Format & Architecture Contracts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -20,12 +20,15 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install 3.11
+        run: uv python install 3.12
 
       - name: Run Ruff Linter & Formatter Check
         run: |
           uv run --with ruff ruff check .
           uv run --with ruff ruff format --check .
+
+      - name: Check Module Size & Layer Contracts
+        run: uv run python scripts/check_module_size.py
 
   typecheck:
     name: Type Check (mypy --strict)
@@ -40,7 +43,7 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        run: uv python install 3.11
+        run: uv python install 3.12
 
       - name: Install Dependencies
         run: uv sync --extra dev
@@ -54,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
@@ -75,3 +78,18 @@ jobs:
 
       - name: Run Test Suite (pytest)
         run: uv run pytest tests/ --cov=pyscio --cov-report=xml --cov-report=term-missing
+
+  build:
+    name: Build Wheel & SDist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build Distributions
+        run: uv build

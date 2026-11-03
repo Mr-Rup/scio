@@ -10,7 +10,7 @@ readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
 authors = [
-    { name = "Mr-Rup", email = "rup@example.com" }
+    { name = "Mr-Rup", email = "majumdarb107@gmail.com" }
 ]
 keywords = [
     "statistics",
@@ -20,18 +20,23 @@ keywords = [
     "pandas",
     "scipy",
     "p-values",
-    "effect-sizes"
+    "effect-sizes",
+    "econometrics",
+    "biostatistics",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
     "Typing :: Typed",
 ]
 dependencies = [
@@ -40,6 +45,13 @@ dependencies = [
     "pandas>=2.1.0",
     "rich>=13.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Mr-Rup/scio"
+Documentation = "https://mr-rup.github.io/scio/"
+Repository = "https://github.com/Mr-Rup/scio.git"
+Issues = "https://github.com/Mr-Rup/scio/issues"
+Changelog = "https://github.com/Mr-Rup/scio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
@@ -50,19 +62,44 @@ dev = [
     "ruff>=0.3.0",
     "pandas-stubs>=2.1.0",
 ]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.25.0",
+]
+
+[dependency-groups]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "hypothesis>=6.90.0",
+]
+lint = [
+    "mypy>=1.8.0",
+    "ruff>=0.3.0",
+    "pandas-stubs>=2.1.0",
+]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.25.0",
+]
+dev = [
+    { include-group = "test" },
+    { include-group = "lint" },
+]
 
 [project.scripts]
 pyscio = "pyscio.cli.app:main"
 
 [tool.hatch.version]
 source = "vcs"
-fallback-version = "0.1.0.dev0"
+fallback-version = "0.2.0.dev0"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
     "/.github",
     "/framework_specs",
-    "/tests",
     ".gitignore",
 ]
 
@@ -75,14 +112,16 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
 ]
-ignore = ["E501"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003", "SIM108"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -104,3 +143,22 @@ ignore_missing_imports = true
 minversion = "8.0"
 testpaths = ["tests"]
 addopts = "-v --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "parity: R 4.3 golden reference numerical parity benchmarks",
+    "property: Hypothesis property-based fuzz tests",
+]
+
+[tool.coverage.run]
+source = ["pyscio"]
+branch = true
+omit = ["pyscio/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
