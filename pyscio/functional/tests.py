@@ -299,3 +299,48 @@ def fisher(table: np.ndarray | list[list[float]], alternative: str = "two-sided"
 
     res = stats.fisher_exact(arr, alternative=alternative)
     return FisherResult(stat=float(res.statistic), p=float(res.pvalue))
+
+
+def mcnemar(
+    table: np.ndarray | list[list[int | float]],
+    *,
+    exact: bool | None = None,
+    correction: bool = True,
+) -> NonParametricResult:
+    """McNemar's test of marginal homogeneity for paired 2x2 contingency tables."""
+    arr = np.asarray(table, dtype=np.float64)
+    if arr.shape != (2, 2):
+        raise ValueError("McNemar test requires a 2x2 contingency table.")
+
+    b = float(arr[0, 1])
+    c = float(arr[1, 0])
+    n_disc = round(b + c)
+    if n_disc == 0:
+        return NonParametricResult(stat=0.0, p=1.0)
+
+    use_exact = (n_disc < 25) if exact is None else exact
+    if use_exact:
+        k_min = round(min(b, c))
+        p_val = float(stats.binomtest(k_min, n=n_disc, p=0.5, alternative="two-sided").pvalue)
+        return NonParametricResult(stat=float(k_min), p=p_val)
+
+    diff = abs(b - c)
+    num = max(0.0, diff - 1.0) ** 2 if correction else diff**2
+    chi2_stat = float(num / (b + c))
+    p_val = float(stats.chi2.sf(chi2_stat, df=1))
+    return NonParametricResult(stat=chi2_stat, p=p_val)
+
+
+def friedman(*groups: np.ndarray | list[float]) -> NonParametricResult:
+    """Friedman's non-parametric repeated-measures test across K >= 3 matched conditions."""
+    cleaned = [clean_1d(g, name=f"condition_{i}") for i, g in enumerate(groups)]
+    if len(cleaned) < 3:
+        raise ValueError("Friedman test requires at least 3 matched conditions.")
+    n0 = len(cleaned[0])
+    if any(len(g) != n0 for g in cleaned):
+        raise ValueError("All conditions in Friedman test must have identical sample lengths.")
+    if n0 < 2:
+        raise ValueError("Friedman test requires at least 2 blocks/subjects.")
+
+    res = stats.friedmanchisquare(*cleaned)
+    return NonParametricResult(stat=float(res.statistic), p=float(res.pvalue))

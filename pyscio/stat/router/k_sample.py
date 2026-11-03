@@ -1,4 +1,4 @@
-"""Autonomous router for K-group (ANOVA / Welch / Kruskal-Wallis) and 2D contingency tables."""
+"""Autonomous router for K-group (ANOVA / Welch / Kruskal-Wallis / Friedman) and 2D contingency tables."""
 
 from __future__ import annotations
 
@@ -11,10 +11,17 @@ from pyscio.core.errors import StatError
 from pyscio.core.guards import check_sample_size, check_variance, clamp_p, clean_1d
 from pyscio.core.results import CheckResult, TestResult
 from pyscio.functional.checks import levene
-from pyscio.functional.effects import cramers_v, eps_sq, eta_sq, interpret_effect, odds_ratio
+from pyscio.functional.effects import (
+    cramers_v,
+    eps_sq,
+    eta_sq,
+    interpret_effect,
+    kendalls_w,
+    odds_ratio,
+)
 from pyscio.functional.posthoc import dunn, games_howell, tukey
-from pyscio.functional.tests import anova, chisq, fisher, kruskal, welch_anova
-from pyscio.stat.router.two_sample import evaluate_normality_with_clt
+from pyscio.functional.tests import anova, chisq, fisher, friedman, kruskal, welch_anova
+from pyscio.stat.router.normality import evaluate_normality_with_clt
 
 
 def route_k_sample(
@@ -116,6 +123,60 @@ def route_k_sample(
         checks=checks,
         posthoc=posthoc_df,
         warns=warns,
+    )
+
+
+def route_paired_k_sample(
+    groups: Sequence[np.ndarray | list[float]],
+    group_names: Sequence[str] | None = None,
+    x_name: str = "condition",
+    y_name: str = "target",
+    alpha: float = 0.05,
+) -> TestResult:
+    """Route K >= 3 repeated-measures conditions via Friedman's test and Kendall's W."""
+    cleaned = [clean_1d(g, name=f"condition_{i}") for i, g in enumerate(groups)]
+    k = len(cleaned)
+    if k < 3:
+        raise StatError("route_paired_k_sample requires k >= 3 matched conditions.")
+
+    n0 = len(cleaned[0])
+    if any(len(g) != n0 for g in cleaned):
+        raise StatError("All repeated-measures conditions must have identical sample lengths.")
+    check_sample_size(cleaned[0], min_n=3, name="subjects")
+
+    names = (
+        list(group_names)
+        if group_names and len(group_names) == k
+        else [f"Condition_{i + 1}" for i in range(k)]
+    )
+
+    f_res = friedman(*cleaned)
+    stat_val = f_res.stat
+    p_val, p_display = clamp_p(f_res.p)
+    eff_val = kendalls_w(*cleaned)
+    magnitude = interpret_effect("cram", eff_val)
+    posthoc_df = (
+        dunn(*cleaned, names=names, p_adjust="fdr_bh", alpha=alpha) if p_val < alpha else None
+    )
+
+    return TestResult(
+        test_name="Friedman Repeated-Measures Test",
+        x_name=x_name,
+        y_name=y_name,
+        stat=stat_val,
+        p=p_val,
+        p_display=p_display,
+        dof=float(k - 1),
+        ci=None,
+        ci_level=1.0 - alpha,
+        sig=p_val < alpha,
+        alpha=alpha,
+        effect=eff_val,
+        metric="Kendall's W",
+        magnitude=magnitude,
+        checks=[],
+        posthoc=posthoc_df,
+        warns=[],
     )
 
 

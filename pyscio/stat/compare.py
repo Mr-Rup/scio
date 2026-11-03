@@ -19,6 +19,7 @@ from pyscio.stat.router import (
     route_independent_two_sample,
     route_k_sample,
     route_one_sample,
+    route_paired_k_sample,
     route_paired_two_sample,
 )
 
@@ -144,8 +145,12 @@ def compare(
         role_x = classify_series(df[col_x])
         role_y = classify_series(df[col_y])
 
-        # Paired test between two numeric columns in same DataFrame
-        if paired:
+        # Paired test between two numeric columns in same DataFrame (wide format)
+        if (
+            paired
+            and pd.api.types.is_numeric_dtype(df[col_x])
+            and pd.api.types.is_numeric_dtype(df[col_y])
+        ):
             sub = df[[col_x, col_y]].dropna()
             if len(sub) == 0:
                 raise MissingDataError(
@@ -207,6 +212,15 @@ def compare(
             )
 
         if len(grouped) == 2:
+            if paired:
+                return route_paired_two_sample(
+                    grouped[0],
+                    grouped[1],
+                    x_name=f"{col_x} ({group_labels[0]} vs {group_labels[1]})",
+                    y_name=col_y,
+                    alpha=alpha,
+                    alternative=alternative,
+                )
             return route_independent_two_sample(
                 grouped[0],
                 grouped[1],
@@ -214,6 +228,15 @@ def compare(
                 y_name=col_y,
                 alpha=alpha,
                 alternative=alternative,
+            )
+
+        if paired:
+            return route_paired_k_sample(
+                grouped,
+                group_names=group_labels,
+                x_name=col_x,
+                y_name=col_y,
+                alpha=alpha,
             )
 
         return route_k_sample(

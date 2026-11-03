@@ -24,6 +24,7 @@ def test_top_level_public_api() -> None:
         "ols",
         "logistic",
         "tost",
+        "solve_power",
     }
     assert expected.issubset(set(sc.__all__))
     for name in expected:
@@ -73,6 +74,8 @@ def test_functional_public_api() -> None:
         "mann_whitney",
         "wilcoxon",
         "kruskal",
+        "friedman",
+        "mcnemar",
         "NonParametricResult",
         "chisq",
         "fisher",
@@ -97,6 +100,7 @@ def test_functional_public_api() -> None:
         "rank_biserial",
         "eta_sq",
         "eps_sq",
+        "kendalls_w",
         "cramers_v",
         "odds_ratio",
         "interpret_effect",
@@ -104,6 +108,10 @@ def test_functional_public_api() -> None:
         "tukey",
         "games_howell",
         "dunn",
+        "pearson_r",
+        "spearman_r",
+        "kendall_tau",
+        "partial_corr",
         "permutation_test",
         "bootstrap_ci",
         "tost",
@@ -117,6 +125,7 @@ def test_functional_public_api() -> None:
         "holm",
         "power_t",
         "power_anova",
+        "solve_power_t",
     }
     assert expected.issubset(set(F.__all__))
     for name in expected:
@@ -132,10 +141,13 @@ def test_stat_and_eda_public_api() -> None:
         "parse_formula",
         "power_t",
         "power_anova",
+        "solve_power",
+        "solve_power_t",
         "route_independent_two_sample",
         "route_paired_two_sample",
         "route_one_sample",
         "route_k_sample",
+        "route_paired_k_sample",
         "route_contingency",
         "evaluate_normality_with_clt",
     }

@@ -17,6 +17,7 @@ from pyscio.functional.adjust import (
     holm,
     power_anova,
     power_t,
+    solve_power_t,
 )
 from pyscio.functional.checks import (
     HomoscedasticityResult,
@@ -30,7 +31,12 @@ from pyscio.functional.checks import (
     sarle_bimodality,
     shapiro,
 )
-from pyscio.functional.correlation import pearson_r, spearman_r
+from pyscio.functional.correlation import (
+    kendall_tau,
+    partial_corr,
+    pearson_r,
+    spearman_r,
+)
 from pyscio.functional.effects import (
     OddsRatioResult,
     cliffs_d,
@@ -43,6 +49,7 @@ from pyscio.functional.effects import (
     hedges_g,
     hedges_g_ci,
     interpret_effect,
+    kendalls_w,
     odds_ratio,
     rank_biserial,
 )
@@ -72,8 +79,10 @@ from pyscio.functional.tests import (
     anova,
     chisq,
     fisher,
+    friedman,
     kruskal,
     mann_whitney,
+    mcnemar,
     one_sample_t,
     paired_t,
     student_t,
@@ -99,11 +108,9 @@ __all__ = [
     "bootstrap_ci",
     "check_normality",
     "check_pathology",
-    # Categorical contingency tests
     "chisq",
     "cliffs_d",
     "cliffs_d_ci",
-    # Effect sizes & exact CIs
     "cohen_d",
     "cohen_d_ci",
     "cramers_v",
@@ -111,9 +118,9 @@ __all__ = [
     "dunn",
     "eps_sq",
     "eta_sq",
-    # Multiple testing & power
     "fdr_bh",
     "fisher",
+    "friedman",
     "games_howell",
     "hedges_g",
     "hedges_g_ci",
@@ -121,29 +128,28 @@ __all__ = [
     "huber_location",
     "interpret_effect",
     "iqr_bounds",
+    "kendall_tau",
+    "kendalls_w",
     "kruskal",
     "levene",
-    # Non-parametric tests
     "mann_whitney",
+    "mcnemar",
     "odds_ratio",
     "one_sample_t",
     "paired_t",
-    # Resampling, correlation & equivalence
+    "partial_corr",
     "pearson_r",
     "permutation_test",
     "power_anova",
     "power_t",
     "rank_biserial",
     "sarle_bimodality",
-    # Assumption checks & pathology guards
     "shapiro",
+    "solve_power_t",
     "spearman_r",
-    # Continuous parametric tests
     "student_t",
     "tost",
-    # Robust statistics
     "trimmed_mean",
-    # Post-hoc pairwise tests
     "tukey",
     "welch_anova",
     "welch_t",

@@ -160,14 +160,16 @@ def cliffs_d_ci(
     a: np.ndarray | list[float],
     b: np.ndarray | list[float],
     conf_level: float = 0.95,
+    *,
+    delta: float | None = None,
 ) -> tuple[float, float]:
     """Compute confidence interval for Cliff's delta via hyperbolic tangent z-transformation."""
     g1 = clean_1d(a, name="sample_a")
     g2 = clean_1d(b, name="sample_b")
     n1, n2 = len(g1), len(g2)
-    delta = cliffs_d(g1, g2)
+    d_val = cliffs_d(g1, g2) if delta is None else float(delta)
     # Clamp slightly away from +/-1 to prevent atanh singularity
-    d_clamped = float(np.clip(delta, -0.9999, 0.9999))
+    d_clamped = float(np.clip(d_val, -0.9999, 0.9999))
     # Asymptotic variance of Cliff's delta under general alternative
     var_d = ((1.0 - d_clamped**2) ** 2) * (n1 + n2 + 1.0) / (3.0 * n1 * n2)
     se_z = math.sqrt(var_d) / (1.0 - d_clamped**2)
@@ -209,6 +211,20 @@ def eps_sq(*groups: np.ndarray | list[float]) -> float:
     h = float(h_res.statistic)
     eps = (h - k + 1) / (n - k)
     return float(np.clip(eps, 0.0, 1.0))
+
+
+def kendalls_w(*groups: np.ndarray | list[float]) -> float:
+    """Compute Kendall's coefficient of concordance $W \\in [0, 1]$ for Friedman's test."""
+    cleaned = [clean_1d(g, name=f"condition_{i}") for i, g in enumerate(groups)]
+    k = len(cleaned)
+    if k < 3:
+        return 0.0
+    n = len(cleaned[0])
+    if n < 2 or any(len(g) != n for g in cleaned):
+        return 0.0
+    chi2_f = float(stats.friedmanchisquare(*cleaned).statistic)
+    w = chi2_f / (n * (k - 1.0))
+    return float(np.clip(w, 0.0, 1.0))
 
 
 def cramers_v(table: np.ndarray | list[list[float]], bias_correction: bool = True) -> float:
