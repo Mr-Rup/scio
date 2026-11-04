@@ -3,9 +3,9 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pyscio"
+name = "omnistats"
 dynamic = ["version"]
-description = "Autonomous Statistical Inference Engine, One-Tap EDA, and Pure Numerical Hypothesis Testing"
+description = "Autonomous Statistical Inference Engine, One-Tap EDA, and Universal Scientific Modeling"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
@@ -23,6 +23,8 @@ keywords = [
     "effect-sizes",
     "econometrics",
     "biostatistics",
+    "causal-inference",
+    "survival-analysis",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -102,7 +104,8 @@ dev = [
 ]
 
 [project.scripts]
-pyscio = "pyscio.cli.app:main"
+omnistats = "omnistats.cli.app:main"
+pyscio = "omnistats.cli.app:main"
 
 [tool.hatch.version]
 source = "vcs"
@@ -116,7 +119,7 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["pyscio"]
+packages = ["omnistats", "pyscio"]
 
 [tool.ruff]
 line-length = 100
@@ -162,9 +165,9 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["pyscio"]
+source = ["omnistats"]
 branch = true
-omit = ["pyscio/__main__.py"]
+omit = ["omnistats/__main__.py"]
 
 [tool.coverage.report]
 show_missing = true

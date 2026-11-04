@@ -1,4 +1,4 @@
-"""Comprehensive test suite for pyscio.eda (ingestion, 8-role classification, quality, correlations, profiling)."""
+"""Comprehensive test suite for omnistats.eda (ingestion, 8-role classification, quality, correlations, profiling)."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import pyscio as sc
-from pyscio.eda import (
+import omnistats as sc
+from omnistats.eda import (
     Role,
     audit_quality,
     classify,
@@ -178,4 +178,4 @@ def test_profile_and_pandas_accessor(
     report.to_html(out_path)
     with open(out_path, encoding="utf-8") as f:
         html_text = f.read()
-    assert "pyscio Exploratory Data Analysis" in html_text
+    assert "omnistats Exploratory Data Analysis" in html_text

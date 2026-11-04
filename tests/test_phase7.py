@@ -1,4 +1,4 @@
-"""Phase 7 and Argon Audit Pillars verification suite for pyscio."""
+"""Phase 7 and Argon Audit Pillars verification suite for omnistats."""
 
 from __future__ import annotations
 
@@ -6,10 +6,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import pyscio as sc
-import pyscio.functional as F
-from pyscio.core.errors import StatError
-from pyscio.core.results import RegressionResult, TestResult
+import omnistats as sc
+import omnistats.functional as F
+from omnistats.core.errors import StatError
+from omnistats.core.results import RegressionResult, TestResult
 
 
 class TestPillar1PathologyGuards:

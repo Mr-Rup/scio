@@ -1,6 +1,6 @@
 """R 4.3 and SciPy golden reference parity benchmarks.
 
-Validates that numerical outputs from pyscio.functional match R 4.3 / SciPy reference outputs
+Validates that numerical outputs from omnistats.functional match R 4.3 / SciPy reference outputs
 to within 1e-4 relative/absolute tolerance across statistics, degrees of freedom, and p-values.
 """
 
@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 
-import pyscio.functional as F
+import omnistats.functional as F
 
 # =============================================================================
 # 1. Welch's and Student's t-test Parity

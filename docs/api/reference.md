@@ -1,6 +1,6 @@
 # API Reference Manual
 
-## Top-Level Namespace (`pyscio`)
+## Top-Level Namespace (`omnistats`)
 
 - `sc.read(source, **kwargs)` — Multi-format tabular reader (CSV/TSV, Parquet, Excel, JSON).
 - `sc.compare(data, x, y, *, alpha=0.05, paired=False, alternative="two-sided", mu=0.0, formula=None)` — Autonomous hypothesis testing router.
@@ -9,7 +9,7 @@
 - `sc.logistic(df, formula, *, alpha=0.05, max_iter=50, tol=1e-6)` — Binary logistic regression via Newton-Raphson IRLS.
 - `sc.tost(a, b=None, *, low=-0.5, high=0.5, bound=None, alpha=0.05, paired=False, popmean=0.0)` — Two One-Sided Tests for statistical equivalence.
 
-## Functional Kernels (`pyscio.functional as F`)
+## Functional Kernels (`omnistats.functional as F`)
 
 ### Parametric & Non-Parametric Tests
 - `F.student_t(a, b, alternative="two-sided", conf_level=0.95) -> TTestResult`

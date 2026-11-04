@@ -1,1 +1,1 @@
-"""Unit, property, and benchmark test suite for pyscio."""
+"""Unit, property, and benchmark test suite for omnistats."""

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-import pyscio as sc
-import pyscio.functional as F
+import omnistats as sc
+import omnistats.functional as F
 
 
 def test_package_metadata() -> None:

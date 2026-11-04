@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pandas as pd
 
-import pyscio as sc
-import pyscio.core as core
-import pyscio.eda as eda
-import pyscio.functional as F
-import pyscio.stat as stat
+import omnistats as sc
+import omnistats.core as core
+import omnistats.eda as eda
+import omnistats.functional as F
+import omnistats.stat as stat
 
 
 def test_top_level_public_api() -> None:

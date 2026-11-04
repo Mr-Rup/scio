@@ -1,10 +1,10 @@
-"""Unit and mathematical accuracy tests for pyscio.functional kernels."""
+"""Unit and mathematical accuracy tests for omnistats.functional kernels."""
 
 from __future__ import annotations
 
 import numpy as np
 
-import pyscio.functional as F
+import omnistats.functional as F
 
 # =============================================================================
 # 1. Assumption Checks Tests

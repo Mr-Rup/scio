@@ -8,9 +8,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-import pyscio as sc
-from pyscio.core import SVGFigure, ensure_pandas_df, is_dataframe_like
-from pyscio.integrations import PolarsScioNamespace
+import omnistats as sc
+from omnistats.core import SVGFigure, ensure_pandas_df, is_dataframe_like
+from omnistats.integrations import PolarsScioNamespace
 
 
 class _MockPolarsDF:
@@ -141,7 +141,7 @@ def test_f7_plotting_svg_and_matplotlib_axes(tmp_path: Path) -> None:
 
 
 def test_f8_polars_lazyframe_and_dict_coercion() -> None:
-    """Verify Polars DataFrame, LazyFrame, and dict coercion across pyscio entry points."""
+    """Verify Polars DataFrame, LazyFrame, and dict coercion across omnistats entry points."""
     raw_dict = {
         "treatment": ["ctrl"] * 25 + ["drug"] * 25,
         "dose": list(np.linspace(1.0, 10.0, 50)),

@@ -1,4 +1,4 @@
-"""Unit tests for pyscio.core exceptions, guards, result containers, and formatters."""
+"""Unit tests for omnistats.core exceptions, guards, result containers, and formatters."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pyscio.core.errors import (
+from omnistats.core.errors import (
     AssumptionError,
     DtypeError,
     MissingDataError,
@@ -15,12 +15,12 @@ from pyscio.core.errors import (
     StatError,
     ZeroVarError,
 )
-from pyscio.core.fmt import (
+from omnistats.core.fmt import (
     format_html_card,
     format_latex_table,
     format_markdown_table,
 )
-from pyscio.core.guards import (
+from omnistats.core.guards import (
     EPSILON,
     check_groups,
     check_low_power,
@@ -30,7 +30,7 @@ from pyscio.core.guards import (
     clamp_p,
     clean_1d,
 )
-from pyscio.core.results import (
+from omnistats.core.results import (
     CheckResult,
     ColProfile,
     EDAReport,
@@ -288,7 +288,7 @@ def test_col_profile_and_eda_report(tmp_path: pytest.TempPathFactory) -> None:
     report.to_html(out_file)
     with open(out_file, encoding="utf-8") as f:
         html_content = f.read()
-    assert "pyscio Exploratory Data Analysis" in html_content
+    assert "omnistats Exploratory Data Analysis" in html_content
     assert "94.5/100" in html_content
 
 

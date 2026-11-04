@@ -3,15 +3,15 @@
 ## Installation
 
 ```bash
-uv add pyscio
+uv add omnistats
 # or
-pip install pyscio
+pip install omnistats
 ```
 
 ## 1. One-Tap Exploratory Data Analysis
 
 ```python
-import pyscio as sc
+import omnistats as sc
 
 df = sc.read("clinical_trial.csv")
 eda_report = df.scio.eda()
@@ -42,10 +42,10 @@ log_res = sc.logistic(df, "remission ~ age + C(treatment_arm)")
 print(log_res.to_df())
 ```
 
-## 4. Stateless Functional Kernels (`pyscio.functional as F`)
+## 4. Stateless Functional Kernels (`omnistats.functional as F`)
 
 ```python
-import pyscio.functional as F
+import omnistats.functional as F
 
 # Welch's t-test returning a 6-field TTestResult NamedTuple
 t_res = F.welch_t(group_a, group_b)

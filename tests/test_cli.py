@@ -1,4 +1,4 @@
-"""Tests for pyscio command-line interface."""
+"""Tests for omnistats command-line interface."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pyscio.cli.app import main
+from omnistats.cli.app import main
 
 
 def test_cli_help(capsys: pytest.CaptureFixture[str]) -> None:

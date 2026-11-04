@@ -1,9 +1,18 @@
 # Changelog
 
-All notable changes to **`pyscio`** are documented in this file.
+All notable changes to **`omnistats`** are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0] - 2026-11-04
+
+### Changed
+- **Official Rebranding to `omnistats`:**
+  - Package renamed to **`omnistats`** on PyPI (`pip install omnistats`).
+  - Primary namespace: `import omnistats as os` or `import omnistats as omni`, with `import omnistats.functional as F`.
+  - Added full backwards-compatibility shim for `pyscio` (`import pyscio as sc` continues to work with a deprecation notice).
+  - DataFrame accessors registered under both `df.omni` (primary) and `df.scio` (alias) across Pandas and Polars.
 
 ## [0.3.0] - 2026-11-04
 
@@ -23,8 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-11-04
 
 ### Added
-- **5-Layer Modular Architecture & Enforcement (R0–R6):** Split large modules into `pyscio/core/results/`, `pyscio/models/`, `pyscio/stat/router/`, and `pyscio/integrations/`, enforced by `scripts/check_module_size.py --strict` in CI.
-- **Lazy Package Startup (PEP 562, R5/R8):** `import pyscio` loads submodules on demand via `importlib.import_module` with `globals()` caching.
+- **5-Layer Modular Architecture & Enforcement (R0–R6):** Split large modules into `omnistats/core/results/`, `omnistats/models/`, `omnistats/stat/router/`, and `omnistats/integrations/`, enforced by `scripts/check_module_size.py --strict` in CI.
+- **Lazy Package Startup (PEP 562, R5/R8):** `import omnistats` loads submodules on demand via `importlib.import_module` with `globals()` caching.
 - **Distributional Pathology Guards (`F.check_pathology`, `F.sarle_bimodality`):** Screens for point-mass/zero-inflation ($\ge 30\%$ ties), heavy-tailed/Cauchy regimes ($\text{SD}/(\text{IQR}/1.34898) > 2.2$), and bimodal mixtures (Sarle's $BC > 0.555$) before permitting Large-$N$ CLT overrides.
 - **Exact Non-Central $t$ Effect Size Confidence Intervals (`F.cohen_d_ci`, `F.hedges_g_ci`, `F.cliffs_d_ci`):** Populates `TestResult.effect_ci` across two-sample, paired, and one-sample designs.
 - **Tensor-Broadcasted Post-Hoc Pairwise Algorithms (`F.tukey`, `F.games_howell`, `F.dunn`):** Replaced Python pair loops with `np.triu_indices` upper-triangle tensor broadcasting and `np.add.reduceat`.
@@ -40,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Default Bayes Factors (`F.bayes_factor_t`, `F.interpret_bf`):** Added Rouder's JZS (Jeffreys-Zellner-Siow) Bayes Factor ($BF_{10}$ and $BF_{01}$) for one-sample, paired, and two-sample $t$-tests via 1D Gaussian quadrature.
 - **APA 7th Edition Reporting (`.apa()`):** Added `.apa()` and `summary(format="apa")` to `TestResult` and `RegressionResult`.
 - **Bidirectional Power & Sample Size Solver (`sc.solve_power`, `F.solve_power_t`):** Solves for required sample size $n$ per group, statistical power, or minimum detectable effect size $d$.
-- **Ecosystem Extras (`pyscio[plot]`, `pyscio[polars]`):**
+- **Ecosystem Extras (`omnistats[plot]`, `omnistats[polars]`):**
   - Dual-backend `.plot()` method on `TestResult`, `RegressionResult`, `ScreenReport`, and `EDAReport`, plus `sc.plot_raincloud` / `df.scio.plot_raincloud` supporting both `matplotlib` and zero-dependency `SVGFigure`.
   - Universal DataFrame coercion (`ensure_pandas_df`) and `PolarsScioNamespace` (`pl_df.scio`) supporting Pandas, Polars (`DataFrame` & `LazyFrame`), Narwhals, PyArrow, and Python dicts.
 - **Documentation, Benchmarks, & Governance Suite:** Added MkDocs-Material documentation under `docs/`, micro-benchmark suite under `benchmarks/bench_kernels.py`, `CITATION.cff`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md`.
@@ -48,4 +57,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-03
 
 ### Added
-- Initial release of `pyscio` with `pyscio.core`, `pyscio.functional`, `pyscio.eda`, `pyscio.stat`, Pandas `.scio` accessor, and Rich CLI.
+- Initial release of `omnistats` with `omnistats.core`, `omnistats.functional`, `omnistats.eda`, `omnistats.stat`, Pandas `.scio` accessor, and Rich CLI.

@@ -1,14 +1,14 @@
-"""Enforce module line budgets and layered architecture import contracts for pyscio.
+"""Enforce module line budgets and layered architecture import contracts for omnistats.
 
 Standards enforced (from framework_specs/10_ENGINEERING_STANDARDS.md):
 1. Module size limits:
-   - pyscio/**/*.py: soft 300 lines, hard 400 lines
+   - omnistats/**/*.py: soft 300 lines, hard 400 lines
    - tests/**/*.py: hard 450 lines
 2. Layered import contracts:
-   - L0 (pyscio.core): never imports functional, models, stat, eda, integrations, cli
-   - L1 (pyscio.functional): never imports core.results, models, stat, eda, integrations, cli
-   - L2 (pyscio.models): never imports stat, eda, integrations, cli
-   - L3 (pyscio.stat / pyscio.eda): independent (stat never imports eda; eda never imports stat)
+   - L0 (omnistats.core): never imports functional, models, stat, eda, integrations, cli
+   - L1 (omnistats.functional): never imports core.results, models, stat, eda, integrations, cli
+   - L2 (omnistats.models): never imports stat, eda, integrations, cli
+   - L3 (omnistats.stat / omnistats.eda): independent (stat never imports eda; eda never imports stat)
 """
 
 from __future__ import annotations
@@ -27,45 +27,45 @@ LEGACY_IMPORT_ALLOWLIST: set[tuple[str, str]] = set()
 
 FORBIDDEN_PREFIXES: dict[str, tuple[str, ...]] = {
     "core": (
-        "pyscio.functional",
-        "pyscio.models",
-        "pyscio.stat",
-        "pyscio.eda",
-        "pyscio.integrations",
-        "pyscio.cli",
+        "omnistats.functional",
+        "omnistats.models",
+        "omnistats.stat",
+        "omnistats.eda",
+        "omnistats.integrations",
+        "omnistats.cli",
     ),
     "functional": (
-        "pyscio.core.results",
-        "pyscio.models",
-        "pyscio.stat",
-        "pyscio.eda",
-        "pyscio.integrations",
-        "pyscio.cli",
+        "omnistats.core.results",
+        "omnistats.models",
+        "omnistats.stat",
+        "omnistats.eda",
+        "omnistats.integrations",
+        "omnistats.cli",
     ),
     "models": (
-        "pyscio.stat",
-        "pyscio.eda",
-        "pyscio.integrations",
-        "pyscio.cli",
+        "omnistats.stat",
+        "omnistats.eda",
+        "omnistats.integrations",
+        "omnistats.cli",
     ),
     "stat": (
-        "pyscio.eda",
-        "pyscio.integrations",
-        "pyscio.cli",
+        "omnistats.eda",
+        "omnistats.integrations",
+        "omnistats.cli",
     ),
     "eda": (
-        "pyscio.stat",
-        "pyscio.models",
-        "pyscio.integrations",
-        "pyscio.cli",
+        "omnistats.stat",
+        "omnistats.models",
+        "omnistats.integrations",
+        "omnistats.cli",
     ),
 }
 
 
 def check_file_sizes(strict: bool = False) -> list[str]:
-    """Return list of size-budget violations across pyscio/ and tests/."""
+    """Return list of size-budget violations across omnistats/ and tests/."""
     errors: list[str] = []
-    for folder, hard_limit in (("pyscio", 400), ("tests", 450)):
+    for folder, hard_limit in (("omnistats", 400), ("tests", 450)):
         base = ROOT / folder
         if not base.exists():
             continue
@@ -92,9 +92,9 @@ def _extract_imports(path: Path) -> list[str]:
 
 
 def check_layer_imports(strict: bool = False) -> list[str]:
-    """Return list of layer-architecture import violations in pyscio/."""
+    """Return list of layer-architecture import violations in omnistats/."""
     errors: list[str] = []
-    pkg_root = ROOT / "pyscio"
+    pkg_root = ROOT / "omnistats"
     for path in sorted(pkg_root.rglob("*.py")):
         rel = path.relative_to(ROOT).as_posix()
         parts = path.relative_to(pkg_root).parts
@@ -114,7 +114,9 @@ def check_layer_imports(strict: bool = False) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Verify pyscio module size and layer contracts.")
+    parser = argparse.ArgumentParser(
+        description="Verify omnistats module size and layer contracts."
+    )
     parser.add_argument(
         "--strict",
         action="store_true",

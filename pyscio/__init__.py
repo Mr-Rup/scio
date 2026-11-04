@@ -1,113 +1,26 @@
-"""pyscio: Autonomous Statistical Inference Engine & One-Tap EDA.
-
-Canonical imports:
-    import pyscio as sc
-    import pyscio.functional as F
-"""
+"""pyscio: Backwards-compatibility shim re-exporting omnistats."""
 
 from __future__ import annotations
 
-import importlib
-from importlib.metadata import PackageNotFoundError, version
-from typing import TYPE_CHECKING, Any
+import sys
+import warnings
 
-from pyscio.accessor import register_accessor
+import omnistats
 
-if TYPE_CHECKING:
-    from pyscio import core, eda, functional, integrations, models, stat
-    from pyscio.eda import read
-    from pyscio.integrations.plotting import plot_raincloud
-    from pyscio.stat import (
-        anova_table,
-        ate,
-        compare,
-        covariate_balance,
-        coxph,
-        logistic,
-        mixedlm,
-        ols,
-        poisson,
-        screen,
-        solve_power,
-        tost,
-    )
+warnings.warn(
+    "The 'pyscio' package has been renamed to 'omnistats'. "
+    "Please update your imports: 'import omnistats as os' (or 'import omnistats as omni').",
+    UserWarning,
+    stacklevel=2,
+)
 
-    F = functional
+# Mirror all attributes from omnistats
+sys.modules["pyscio"] = omnistats
 
-try:
-    __version__ = version("pyscio")
-except PackageNotFoundError:
-    __version__ = "0.3.0"
-
-# Register the DataFrame accessor: df.scio
-register_accessor()
-
-__all__ = [
-    "F",
-    "__version__",
-    "anova_table",
-    "ate",
-    "compare",
-    "core",
-    "covariate_balance",
-    "coxph",
-    "eda",
-    "functional",
-    "integrations",
-    "logistic",
-    "mixedlm",
-    "models",
-    "ols",
-    "plot_raincloud",
-    "poisson",
-    "read",
-    "screen",
-    "solve_power",
-    "stat",
-    "tost",
-]
+__version__ = omnistats.__version__
+F = omnistats.F
+__all__ = omnistats.__all__
 
 
-def __getattr__(name: str) -> Any:
-    """Lazy PEP 562 module attribute loader with globals() caching for zero repeat overhead."""
-    if name in ("F", "functional"):
-        mod = importlib.import_module("pyscio.functional")
-        globals()[name] = mod
-        return mod
-    if name in ("core", "models", "eda", "stat", "integrations"):
-        mod = importlib.import_module(f"pyscio.{name}")
-        globals()[name] = mod
-        return mod
-    if name == "read":
-        eda_mod = importlib.import_module("pyscio.eda")
-        val = eda_mod.read
-        globals()[name] = val
-        return val
-    if name == "plot_raincloud":
-        plot_mod = importlib.import_module("pyscio.integrations.plotting")
-        val = plot_mod.plot_raincloud
-        globals()[name] = val
-        return val
-    if name in (
-        "anova_table",
-        "ate",
-        "compare",
-        "covariate_balance",
-        "coxph",
-        "screen",
-        "ols",
-        "logistic",
-        "mixedlm",
-        "poisson",
-        "tost",
-        "solve_power",
-    ):
-        stat_mod = importlib.import_module("pyscio.stat")
-        val = getattr(stat_mod, name)
-        globals()[name] = val
-        return val
-    raise AttributeError(f"module 'pyscio' has no attribute '{name}'")
-
-
-def __dir__() -> list[str]:
-    return sorted(__all__)
+def __getattr__(name: str) -> object:
+    return getattr(omnistats, name)

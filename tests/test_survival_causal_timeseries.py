@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-import pyscio as sc
-import pyscio.functional as F
+import omnistats as sc
+import omnistats.functional as F
 
 
 def test_s1_kaplan_meier_and_logrank() -> None:

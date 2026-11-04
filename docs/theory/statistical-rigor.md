@@ -4,7 +4,7 @@
 
 For large sample sizes ($N \ge 500$), formal normality tests (Shapiro-Wilk, D'Agostino-Pearson $K^2$) reject normality for negligible deviations. However, naive moment-based Central Limit Theorem (CLT) overrides ($|\gamma_1| < 1.0 \land |\gamma_2| < 2.0$) can be fooled by symmetric heavy-tailed, zero-inflated, or bimodal distributions.
 
-`pyscio` enforces a 3-stage pathology screen (`F.check_pathology`) before permitting a CLT override:
+`omnistats` enforces a 3-stage pathology screen (`F.check_pathology`) before permitting a CLT override:
 
 1. **Point-Mass / Zero-Inflation Guard:** Rejects parametric routing if the maximum single-value tie proportion $\max_v \frac{\#\{x_i = v\}}{n} \ge 0.30$.
 2. **Heavy-Tailed / Cauchy Scale Guard:** Compares sample standard deviation against the Gaussian-calibrated interquartile scale:
@@ -16,7 +16,7 @@ For large sample sizes ($N \ge 500$), formal normality tests (Shapiro-Wilk, D'Ag
 
 ## 2. Exact Non-Central $t$ Confidence Intervals for Effect Sizes
 
-Rather than relying on symmetric normal approximations for Cohen's $d$ and Hedges' $g$, `pyscio` inverts the cumulative distribution function of the Non-Central $t$-distribution ($F_{t,\nu}(\cdot; \lambda)$) via Brent's root-finding method (`scipy.optimize.brentq`):
+Rather than relying on symmetric normal approximations for Cohen's $d$ and Hedges' $g$, `omnistats` inverts the cumulative distribution function of the Non-Central $t$-distribution ($F_{t,\nu}(\cdot; \lambda)$) via Brent's root-finding method (`scipy.optimize.brentq`):
 
 $$F_{t,\nu}(t_{\text{obs}}; \lambda_L) = 1 - \frac{\alpha}{2}, \qquad F_{t,\nu}(t_{\text{obs}}; \lambda_U) = \frac{\alpha}{2}$$
 

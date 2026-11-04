@@ -6,11 +6,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import pyscio as sc
-from pyscio.core.errors import MissingDataError
-from pyscio.core.results import ScreenReport, TestResult
-from pyscio.stat.compare import compare
-from pyscio.stat.router import (
+import omnistats as sc
+from omnistats.core.errors import MissingDataError
+from omnistats.core.results import ScreenReport, TestResult
+from omnistats.stat.compare import compare
+from omnistats.stat.router import (
     evaluate_normality_with_clt,
     route_contingency,
     route_independent_two_sample,
@@ -18,7 +18,7 @@ from pyscio.stat.router import (
     route_one_sample,
     route_paired_two_sample,
 )
-from pyscio.stat.screen import screen
+from omnistats.stat.screen import screen
 
 
 @pytest.fixture

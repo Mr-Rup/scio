@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-title: "pyscio: Autonomous Statistical Inference Engine, One-Tap EDA, and Pure Numerical Hypothesis Testing"
-message: "If you use pyscio in your research or software, please cite it using the metadata below."
+title: "omnistats: Autonomous Statistical Inference Engine, One-Tap EDA, and Pure Numerical Hypothesis Testing"
+message: "If you use omnistats in your research or software, please cite it using the metadata below."
 type: software
 authors:
   - alias: "Mr-Rup"

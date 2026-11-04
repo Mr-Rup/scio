@@ -32,11 +32,13 @@ jobs:
       - name: Smoke-test Built Wheel in Isolated Environment
         run: |
           uv run --isolated --no-project --with dist/*.whl python -c "
+          import omnistats as omni
+          import omnistats.functional as F
           import pyscio as sc
-          import pyscio.functional as F
           res = F.welch_t([1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0])
           assert res.p < 0.05
-          print('Smoke test passed for pyscio version:', sc.__version__)
+          assert omni.__version__ == sc.__version__
+          print('Smoke test passed for omnistats version:', omni.__version__)
           "
 
       - name: Upload Distribution Artifacts

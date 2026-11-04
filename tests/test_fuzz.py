@@ -8,11 +8,11 @@ import numpy as np
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from pyscio.core.errors import MissingDataError, ZeroVarError
-from pyscio.core.guards import EPSILON, clamp_p, clean_1d
-from pyscio.functional.adjust import fdr_bh
-from pyscio.functional.effects import cliffs_d
-from pyscio.stat.compare import compare
+from omnistats.core.errors import MissingDataError, ZeroVarError
+from omnistats.core.guards import EPSILON, clamp_p, clean_1d
+from omnistats.functional.adjust import fdr_bh
+from omnistats.functional.effects import cliffs_d
+from omnistats.stat.compare import compare
 
 
 @given(st.floats(allow_nan=True, allow_infinity=True))
