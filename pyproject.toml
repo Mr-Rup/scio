@@ -109,7 +109,7 @@ pyscio = "omnistats.cli.app:main"
 
 [tool.hatch.version]
 source = "vcs"
-fallback-version = "0.3.0"
+fallback-version = "0.4.0"
 
 [tool.hatch.build.targets.sdist]
 exclude = [

@@ -1,4 +1,4 @@
-"""Reproducible micro-benchmark suite for pyscio kernels and routing (Phase R8)."""
+"""Reproducible micro-benchmark suite for omnistats kernels and routing (Phase R8)."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from collections.abc import Callable
 import numpy as np
 import pandas as pd
 
-import pyscio as sc
-import pyscio.functional as F
+import omnistats as omni
+import omnistats.functional as F
 
 
 def _bench(label: str, fn: Callable[[], object], repeats: int = 7) -> tuple[float, float]:
@@ -46,9 +46,9 @@ def main() -> None:
     )
 
     print("=" * 80)
-    print("pyscio Kernel & Router Benchmark Suite (7 repeats after warm-up)")
+    print("omnistats Kernel & Router Benchmark Suite (7 repeats after warm-up)")
     print("=" * 80)
-    _bench("Welch t-test + NCT CI (N=100,000)", lambda: sc.compare(g1_large, g2_large))
+    _bench("Welch t-test + NCT CI (N=100,000)", lambda: omni.compare(g1_large, g2_large))
     _bench("Cliff's delta O(N log N) (N=100,000)", lambda: F.cliffs_d(g1_large, g2_large))
     _bench("Games-Howell tensor post-hoc (K=15)", lambda: F.games_howell(*groups_k15))
     _bench("Dunn rank tensor post-hoc (K=15)", lambda: F.dunn(*groups_k15))
@@ -56,7 +56,7 @@ def main() -> None:
         "BCa Bootstrap CI (N=500, B=2,000)",
         lambda: F.bootstrap_ci(boot_arr, n_resamples=2000, seed=42),
     )
-    _bench("OLS QR + HC3 Robust SE (N=5,000, p=4)", lambda: sc.ols(df_ols, "y ~ x1 + x2 + x3"))
+    _bench("OLS QR + HC3 Robust SE (N=5,000, p=4)", lambda: omni.ols(df_ols, "y ~ x1 + x2 + x3"))
     print("=" * 80)
 
 
