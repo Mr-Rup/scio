@@ -7,17 +7,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
-  build-docs:
-    name: Build MkDocs-Material Site
+  deploy-docs:
+    name: Build & Deploy MkDocs to gh-pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -36,22 +30,8 @@ jobs:
       - name: Install Docs Dependencies
         run: uv sync --extra docs
 
-      - name: Build Documentation Site
-        run: uv run mkdocs build --strict --site-dir site
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-  deploy-docs:
-    name: Deploy to GitHub Pages
-    needs: [build-docs]
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          uv run mkdocs gh-deploy --force

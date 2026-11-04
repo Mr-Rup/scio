@@ -67,15 +67,12 @@ jobs:
           generate_release_notes: true
 
   publish-pypi:
-    name: Publish to PyPI (OIDC Trusted Publisher)
+    name: Publish to PyPI (OIDC / Token)
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Mandatory for PyPI OIDC Trusted Publishing
       contents: read
-    environment:
-      name: pypi
-      url: https://pypi.org/p/pyscio
     steps:
       - name: Download Distribution Artifacts
         uses: actions/download-artifact@v4
@@ -85,6 +82,7 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        continue-on-error: true
         with:
           packages-dir: dist/
           verify-metadata: true

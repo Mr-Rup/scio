@@ -189,8 +189,10 @@ def plot_regression_forest(result: RegressionResult, ax: Any = None, backend: st
     non_int = df[df["term"] != "Intercept"] if len(df) > 1 else df
     labels = [str(t) for t in non_int["term"].tolist()]
     estimates = [float(v) for v in non_int["coef"].tolist()]
-    lows = [float(v) for v in non_int["ci_lower"].tolist()]
-    highs = [float(v) for v in non_int["ci_upper"].tolist()]
+    lo_col = "ci_low" if "ci_low" in non_int.columns else "ci_lower"
+    hi_col = "ci_high" if "ci_high" in non_int.columns else "ci_upper"
+    lows = [float(v) for v in non_int[lo_col].tolist()]
+    highs = [float(v) for v in non_int[hi_col].tolist()]
     sigs = [float(p) < result.alpha for p in non_int["p_value"].tolist()]
 
     if not _use_matplotlib(ax, backend):

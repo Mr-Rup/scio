@@ -201,4 +201,3 @@ def test_f10_linear_mixed_effects_model() -> None:
     cmp_lmm = sc.compare(df, "score ~ time + (1 | subject)")
     assert "Linear Mixed Model" in cmp_lmm.test_name
     assert cmp_lmm.sig
-
