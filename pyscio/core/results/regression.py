@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from pyscio.core.base import BaseResult
 from pyscio.core.fmt import format_html_card
+from pyscio.core.plotting import plot_regression_forest
 from pyscio.core.results.apa import format_regression_apa
 
 if TYPE_CHECKING:
@@ -39,6 +40,10 @@ class RegressionResult(BaseResult):
     def apa(self) -> str:
         """Return an APA 7th Edition statistical summary string."""
         return format_regression_apa(self)
+
+    def plot(self, ax: Any = None, backend: str = "auto") -> Any:
+        """Plot a coefficient forest plot (estimates and 95% CIs) via matplotlib or SVGFigure."""
+        return plot_regression_forest(self, ax=ax, backend=backend)
 
     def to_dict(self) -> dict[str, Any]:
         return {

@@ -8,11 +8,12 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from pyscio.core.dataframe import ensure_pandas_df, is_dataframe_like
 from pyscio.core.errors import MissingDataError, StatError
 from pyscio.core.results import TestResult
 from pyscio.core.roles import Role, classify_series
 from pyscio.functional.effects import interpret_effect
-from pyscio.models import _clean_var_name, extract_formula_vars, logistic, ols
+from pyscio.models import _clean_var_name, extract_formula_vars, logistic, mixedlm, ols
 from pyscio.stat.router import (
     route_contingency,
     route_correlation,
@@ -47,16 +48,38 @@ def compare(
     ``compare(df, "y ~ x1 + x2 + C(group)")``).
     """
     # -------------------------------------------------------------------------
-    # Case 1: Pandas DataFrame Input
+    # Case 1: Tabular DataFrame Input (Pandas, Polars, PyArrow, Narwhals, dict)
     # -------------------------------------------------------------------------
-    if isinstance(data, pd.DataFrame):
-        df = data
+    if is_dataframe_like(data):
+        df = ensure_pandas_df(data)
 
         # Detect Wilkinson formula in `formula` or `x`
         active_formula = (
             formula if formula is not None else (x if isinstance(x, str) and "~" in x else None)
         )
         if active_formula is not None:
+            if "|" in active_formula:
+                reg_res = mixedlm(df, active_formula, alpha=alpha)
+                return TestResult(
+                    test_name=reg_res.model_type,
+                    x_name=reg_res.formula.split("~", 1)[1].strip(),
+                    y_name=reg_res.y_name,
+                    stat=reg_res.stat,
+                    p=reg_res.p,
+                    p_display=reg_res.p_display,
+                    dof=(float(reg_res.df_model), float(reg_res.df_resid)),
+                    ci=None,
+                    ci_level=1.0 - alpha,
+                    sig=reg_res.p < alpha,
+                    alpha=alpha,
+                    effect=reg_res.r_squared,
+                    effect_ci=None,
+                    metric="Marginal R²",
+                    magnitude=interpret_effect("eta", reg_res.r_squared),
+                    checks=[],
+                    posthoc=reg_res.coef_df,
+                    warns=reg_res.warns,
+                )
             lhs, rhs_terms = extract_formula_vars(active_formula)
             non_intercept = [t for t in rhs_terms if t not in ("1", "0", "-1")]
             if len(non_intercept) == 1 and ":" not in non_intercept[0]:

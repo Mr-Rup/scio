@@ -14,12 +14,14 @@ from typing import TYPE_CHECKING, Any
 from pyscio.accessor import register_accessor
 
 if TYPE_CHECKING:
-    from pyscio import core, eda, functional, models, stat
+    from pyscio import core, eda, functional, integrations, models, stat
     from pyscio.eda import read
+    from pyscio.integrations.plotting import plot_raincloud
     from pyscio.stat import (
         anova_table,
         compare,
         logistic,
+        mixedlm,
         ols,
         poisson,
         screen,
@@ -32,7 +34,7 @@ if TYPE_CHECKING:
 try:
     __version__ = version("pyscio")
 except PackageNotFoundError:
-    __version__ = "0.2.0.dev0"
+    __version__ = "0.2.0"
 
 # Register the DataFrame accessor: df.scio
 register_accessor()
@@ -45,9 +47,12 @@ __all__ = [
     "core",
     "eda",
     "functional",
+    "integrations",
     "logistic",
+    "mixedlm",
     "models",
     "ols",
+    "plot_raincloud",
     "poisson",
     "read",
     "screen",
@@ -63,7 +68,7 @@ def __getattr__(name: str) -> Any:
         mod = importlib.import_module("pyscio.functional")
         globals()[name] = mod
         return mod
-    if name in ("core", "models", "eda", "stat"):
+    if name in ("core", "models", "eda", "stat", "integrations"):
         mod = importlib.import_module(f"pyscio.{name}")
         globals()[name] = mod
         return mod
@@ -72,12 +77,18 @@ def __getattr__(name: str) -> Any:
         val = eda_mod.read
         globals()[name] = val
         return val
+    if name == "plot_raincloud":
+        plot_mod = importlib.import_module("pyscio.integrations.plotting")
+        val = plot_mod.plot_raincloud
+        globals()[name] = val
+        return val
     if name in (
         "anova_table",
         "compare",
         "screen",
         "ols",
         "logistic",
+        "mixedlm",
         "poisson",
         "tost",
         "solve_power",

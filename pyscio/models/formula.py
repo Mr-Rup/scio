@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
+from pyscio.core.dataframe import ensure_pandas_df
 from pyscio.core.errors import MissingDataError, StatError
 
 
@@ -50,10 +52,11 @@ def _clean_var_name(token: str) -> tuple[str, bool]:
 
 
 def parse_formula(
-    df: pd.DataFrame,
+    df: pd.DataFrame | Any,
     formula: str,
 ) -> tuple[str, np.ndarray, list[str], np.ndarray]:
     """Parse a Wilkinson formula ('y ~ x1 + C(x2) + x1:x2') into design matrix X and response y."""
+    df = ensure_pandas_df(df)
     lhs, rhs_terms = extract_formula_vars(formula)
 
     referenced_cols: list[str] = []

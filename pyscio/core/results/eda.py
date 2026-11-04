@@ -10,6 +10,7 @@ import pandas as pd
 
 from pyscio.core.base import BaseResult
 from pyscio.core.fmt import format_html_card
+from pyscio.core.plotting import plot_eda_report
 
 if TYPE_CHECKING:
     from rich.console import Console, ConsoleOptions, RenderResult
@@ -111,6 +112,10 @@ class EDAReport(BaseResult):
     def to_df(self) -> pd.DataFrame:
         records = [p.to_dict() for p in self.profiles.values()]
         return pd.DataFrame(records)
+
+    def plot(self, ax: Any = None, backend: str = "auto") -> Any:
+        """Plot column completeness (%) across profiled dataset columns."""
+        return plot_eda_report(self, ax=ax, backend=backend)
 
     def to_html(self, path: str) -> None:
         """Export standalone interactive HTML report to disk."""

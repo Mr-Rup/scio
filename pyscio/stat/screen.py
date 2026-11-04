@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from pyscio.core.dataframe import ensure_pandas_df, is_dataframe_like
 from pyscio.core.errors import ScioError
 from pyscio.core.results import ScreenReport, TestResult
 from pyscio.core.roles import Role, classify
@@ -46,7 +47,12 @@ def screen(
         and all underlying TestResult containers.
     """
     if not isinstance(df, pd.DataFrame):
-        raise TypeError(f"screen() expects a pandas DataFrame, got {type(df).__name__}")
+        if is_dataframe_like(df):
+            df = ensure_pandas_df(df)
+        else:
+            raise TypeError(
+                f"screen() expects a DataFrame-compatible object, got {type(df).__name__}"
+            )
 
     if y not in df.columns:
         raise KeyError(f"Target column '{y}' not found in DataFrame columns: {list(df.columns)}")

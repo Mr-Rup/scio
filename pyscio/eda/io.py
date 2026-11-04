@@ -8,9 +8,11 @@ from typing import Any, cast
 
 import pandas as pd
 
+from pyscio.core.dataframe import ensure_pandas_df, is_dataframe_like
+
 
 def read(
-    source: str | Path | pd.DataFrame,
+    source: str | Path | pd.DataFrame | Any,
     **kwargs: Any,
 ) -> pd.DataFrame:
     """Ingest tabular data from multiple formats into a clean Pandas DataFrame.
@@ -31,6 +33,8 @@ def read(
     """
     if isinstance(source, pd.DataFrame):
         return source.copy()
+    if not isinstance(source, (str, Path)) and is_dataframe_like(source):
+        return ensure_pandas_df(source).copy()
 
     path = Path(source)
     if not path.exists():

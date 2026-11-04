@@ -54,6 +54,18 @@ Issues = "https://github.com/Mr-Rup/scio/issues"
 Changelog = "https://github.com/Mr-Rup/scio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+plot = [
+    "matplotlib>=3.8.0",
+]
+polars = [
+    "polars>=0.20.0",
+    "narwhals>=1.0.0",
+]
+all = [
+    "matplotlib>=3.8.0",
+    "polars>=0.20.0",
+    "narwhals>=1.0.0",
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-cov>=4.1.0",
@@ -94,7 +106,7 @@ pyscio = "pyscio.cli.app:main"
 
 [tool.hatch.version]
 source = "vcs"
-fallback-version = "0.2.0.dev0"
+fallback-version = "0.2.0"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
@@ -136,7 +148,7 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["scipy.*", "rich.*"]
+module = ["scipy.*", "rich.*", "matplotlib.*", "polars.*", "narwhals.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

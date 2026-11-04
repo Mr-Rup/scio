@@ -15,6 +15,7 @@ from pyscio.core.constants import (
     PATHOLOGY_TIE_THRESHOLD,
     SMALL_SAMPLE_HEDGES_N,
 )
+from pyscio.core.dataframe import ensure_pandas_df, is_dataframe_like
 from pyscio.core.errors import (
     AssumptionError,
     AssumptionWarning,
@@ -37,6 +38,7 @@ from pyscio.core.guards import (
     clamp_p,
     clean_1d,
 )
+from pyscio.core.plotting import SVGFigure
 from pyscio.core.results import (
     CheckResult,
     ColProfile,
@@ -96,6 +98,7 @@ __all__ = [
     "RMAnovaResult",
     "RegressionResult",
     "Role",
+    "SVGFigure",
     "SampleSizeError",
     "ScioError",
     "ScioWarning",
@@ -114,4 +117,6 @@ __all__ = [
     "classify",
     "classify_series",
     "clean_1d",
+    "ensure_pandas_df",
+    "is_dataframe_like",
 ]

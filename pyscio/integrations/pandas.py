@@ -56,9 +56,21 @@ class ScioAccessor:
 
         return anova_table(self._obj, formula=formula, **kwargs)
 
+    def mixedlm(self, formula: str, **kwargs: Any) -> Any:
+        """Fit a Linear Mixed-Effects Model (Random Intercepts) via REML/ML."""
+        from pyscio.models import mixedlm
+
+        return mixedlm(self._obj, formula=formula, **kwargs)
+
+    def plot_raincloud(self, x: str, y: str, **kwargs: Any) -> Any:
+        """Render a Raincloud distribution plot comparing `y` across `x`."""
+        from pyscio.integrations.plotting import plot_raincloud
+
+        return plot_raincloud(self._obj, x=x, y=y, **kwargs)
+
 
 def register_accessor() -> None:
-    """Register the `scio` accessor on pandas.DataFrame if pandas is available."""
+    """Register the `scio` accessor on pandas.DataFrame and polars.DataFrame if available."""
     try:
         import pandas as pd
 
@@ -66,3 +78,7 @@ def register_accessor() -> None:
             pd.api.extensions.register_dataframe_accessor("scio")(ScioAccessor)
     except (ImportError, AttributeError):
         pass
+
+    from pyscio.integrations.polars import register_polars_namespace
+
+    register_polars_namespace()

@@ -10,6 +10,7 @@ import pandas as pd
 
 from pyscio.core.base import BaseResult
 from pyscio.core.fmt import format_html_card, format_markdown_table
+from pyscio.core.plotting import plot_screen_report, plot_test_result
 from pyscio.core.results.apa import format_test_apa
 
 if TYPE_CHECKING:
@@ -66,6 +67,10 @@ class TestResult(BaseResult):
     def apa(self) -> str:
         """Return an APA 7th Edition statistical report string."""
         return format_test_apa(self)
+
+    def plot(self, ax: Any = None, backend: str = "auto") -> Any:
+        """Plot point estimate and confidence interval via matplotlib or SVGFigure."""
+        return plot_test_result(self, ax=ax, backend=backend)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -230,6 +235,10 @@ class ScreenReport(BaseResult):
 
     def leaderboard(self) -> pd.DataFrame:
         return self.leaderboard_df
+
+    def plot(self, ax: Any = None, backend: str = "auto") -> Any:
+        """Plot FDR discovery significance (-log10 q-value) across screened features."""
+        return plot_screen_report(self, ax=ax, backend=backend)
 
     def to_dict(self) -> dict[str, Any]:
         n_sig = (
