@@ -25,7 +25,7 @@
     
     
       
-        <title>Reference Manual - pyscio</title>
+        <title>Reference Manual - omnistats</title>
       
     
     
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="pyscio" class="md-header__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-header__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            pyscio
+            omnistats
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -222,13 +222,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="pyscio" class="md-nav__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-nav__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    pyscio
+    omnistats
   </label>
   
     <div class="md-nav__source">
@@ -571,10 +571,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#top-level-namespace-pyscio" class="md-nav__link">
+  <a href="#top-level-namespace-omnistats" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Top-Level Namespace (pyscio)
+        Top-Level Namespace (omnistats)
       
     </span>
   </a>
@@ -582,15 +582,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#functional-kernels-pysciofunctional-as-f" class="md-nav__link">
+  <a href="#functional-kernels-omnistatsfunctional-as-f" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Functional Kernels (pyscio.functional as F)
+        Functional Kernels (omnistats.functional as F)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Functional Kernels (pyscio.functional as F)">
+    <nav class="md-nav" aria-label="Functional Kernels (omnistats.functional as F)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -685,10 +685,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#top-level-namespace-pyscio" class="md-nav__link">
+  <a href="#top-level-namespace-omnistats" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Top-Level Namespace (pyscio)
+        Top-Level Namespace (omnistats)
       
     </span>
   </a>
@@ -696,15 +696,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#functional-kernels-pysciofunctional-as-f" class="md-nav__link">
+  <a href="#functional-kernels-omnistatsfunctional-as-f" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Functional Kernels (pyscio.functional as F)
+        Functional Kernels (omnistats.functional as F)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Functional Kernels (pyscio.functional as F)">
+    <nav class="md-nav" aria-label="Functional Kernels (omnistats.functional as F)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -777,7 +777,7 @@
 
 
 <h1 id="api-reference-manual">API Reference Manual</h1>
-<h2 id="top-level-namespace-pyscio">Top-Level Namespace (<code>pyscio</code>)</h2>
+<h2 id="top-level-namespace-omnistats">Top-Level Namespace (<code>omnistats</code>)</h2>
 <ul>
 <li><code>sc.read(source, **kwargs)</code> — Multi-format tabular reader (CSV/TSV, Parquet, Excel, JSON).</li>
 <li><code>sc.compare(data, x, y, *, alpha=0.05, paired=False, alternative="two-sided", mu=0.0, formula=None)</code> — Autonomous hypothesis testing router.</li>
@@ -786,7 +786,7 @@
 <li><code>sc.logistic(df, formula, *, alpha=0.05, max_iter=50, tol=1e-6)</code> — Binary logistic regression via Newton-Raphson IRLS.</li>
 <li><code>sc.tost(a, b=None, *, low=-0.5, high=0.5, bound=None, alpha=0.05, paired=False, popmean=0.0)</code> — Two One-Sided Tests for statistical equivalence.</li>
 </ul>
-<h2 id="functional-kernels-pysciofunctional-as-f">Functional Kernels (<code>pyscio.functional as F</code>)</h2>
+<h2 id="functional-kernels-omnistatsfunctional-as-f">Functional Kernels (<code>omnistats.functional as F</code>)</h2>
 <h3 id="parametric-non-parametric-tests">Parametric &amp; Non-Parametric Tests</h3>
 <ul>
 <li><code>F.student_t(a, b, alternative="two-sided", conf_level=0.95) -&gt; TTestResult</code></li>

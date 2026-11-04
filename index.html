@@ -25,7 +25,7 @@
     
     
       
-        <title>pyscio</title>
+        <title>omnistats</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pyscio-documentation" class="md-skip">
+        <a href="#omnistats-documentation" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="pyscio" class="md-header__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="." title="omnistats" class="md-header__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            pyscio
+            omnistats
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -222,13 +222,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="pyscio" class="md-nav__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="." title="omnistats" class="md-nav__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    pyscio
+    omnistats
   </label>
   
     <div class="md-nav__source">
@@ -676,16 +676,16 @@
   
 
 
-<h1 id="pyscio-documentation">pyscio Documentation</h1>
-<p><strong><code>pyscio</code></strong> is an autonomous statistical inference engine, one-tap exploratory data analysis (EDA) suite, multivariate regression toolkit, and pure numerical hypothesis testing framework for Python (<code>&gt;= 3.11</code>).</p>
+<h1 id="omnistats-documentation">omnistats Documentation</h1>
+<p><strong><code>omnistats</code></strong> is an autonomous statistical inference engine, one-tap exploratory data analysis (EDA) suite, multivariate regression toolkit, and pure numerical hypothesis testing framework for Python (<code>&gt;= 3.11</code>).</p>
 <h2 id="architectural-layers">Architectural Layers</h2>
-<p><code>pyscio</code> enforces a strict 5-layer downward dependency graph:</p>
+<p><code>omnistats</code> enforces a strict 5-layer downward dependency graph:</p>
 <ol>
-<li><strong><code>pyscio.core</code> (L0):</strong> Immutable result containers (<code>TestResult</code>, <code>RegressionResult</code>, <code>EDAReport</code>, <code>ScreenReport</code>, <code>SVGFigure</code>), typed domain exceptions (<code>StatError</code>, <code>SampleSizeError</code>, <code>ZeroVarError</code>), 8-role semantic column classification (<code>Role</code>), universal DataFrame coercion (<code>ensure_pandas_df</code>), and HTML/Rich/LaTeX/Markdown/APA/SVG renderers.</li>
-<li><strong><code>pyscio.functional</code> as <code>F</code> (L1):</strong> Stateless, deterministic NumPy/SciPy mathematical kernels returning lightweight <code>NamedTuple</code>s (<code>TTestResult</code>, <code>ANOVAResult</code>, <code>RMAnovaResult</code>, <code>NonParametricResult</code>, <code>TOSTResult</code>, <code>CorrelationResult</code>, <code>BayesFactorResult</code>).</li>
-<li><strong><code>pyscio.models</code> (L2):</strong> Wilkinson formula design matrix parser (<code>parse_formula</code>), Ordinary Least Squares (<code>ols</code> with QR decomposition and MacKinnon-White HC0–HC3 robust standard errors), Type II &amp; Type III Factorial ANOVA (<code>anova_table</code>), Newton-Raphson IRLS binary logistic regression (<code>logistic</code>), Poisson log-linear GLM (<code>poisson</code> with QMLE HC3 SEs &amp; IRR), and Linear Mixed-Effects Models (<code>mixedlm</code> via Profiled REML/ML).</li>
-<li><strong><code>pyscio.stat</code> &amp; <code>pyscio.eda</code> (L3):</strong> Autonomous assumption-checked decision router (<code>compare</code>, <code>screen</code>, <code>tost</code>, <code>solve_power</code>) and vectorized exploratory data analysis (<code>read</code>, <code>profile</code>, <code>audit_quality</code>, <code>correlations</code>, <code>vif</code>).</li>
-<li><strong><code>pyscio.integrations</code> &amp; <code>pyscio.cli</code> (L4):</strong> Native Pandas (<code>df.scio</code>) and Polars (<code>pl_df.scio</code>) DataFrame accessors, dual-backend statistical plotting (<code>plot_raincloud</code>, <code>.plot()</code>), and the <code>pyscio</code> command-line interface.</li>
+<li><strong><code>omnistats.core</code> (L0):</strong> Immutable result containers (<code>TestResult</code>, <code>RegressionResult</code>, <code>EDAReport</code>, <code>ScreenReport</code>, <code>SVGFigure</code>), typed domain exceptions (<code>StatError</code>, <code>SampleSizeError</code>, <code>ZeroVarError</code>), 8-role semantic column classification (<code>Role</code>), universal DataFrame coercion (<code>ensure_pandas_df</code>), and HTML/Rich/LaTeX/Markdown/APA/SVG renderers.</li>
+<li><strong><code>omnistats.functional</code> as <code>F</code> (L1):</strong> Stateless, deterministic NumPy/SciPy mathematical kernels returning lightweight <code>NamedTuple</code>s (<code>TTestResult</code>, <code>ANOVAResult</code>, <code>RMAnovaResult</code>, <code>NonParametricResult</code>, <code>TOSTResult</code>, <code>CorrelationResult</code>, <code>BayesFactorResult</code>).</li>
+<li><strong><code>omnistats.models</code> (L2):</strong> Wilkinson formula design matrix parser (<code>parse_formula</code>), Ordinary Least Squares (<code>ols</code> with QR decomposition and MacKinnon-White HC0–HC3 robust standard errors), Type II &amp; Type III Factorial ANOVA (<code>anova_table</code>), Newton-Raphson IRLS binary logistic regression (<code>logistic</code>), Poisson log-linear GLM (<code>poisson</code> with QMLE HC3 SEs &amp; IRR), and Linear Mixed-Effects Models (<code>mixedlm</code> via Profiled REML/ML).</li>
+<li><strong><code>omnistats.stat</code> &amp; <code>omnistats.eda</code> (L3):</strong> Autonomous assumption-checked decision router (<code>compare</code>, <code>screen</code>, <code>tost</code>, <code>solve_power</code>) and vectorized exploratory data analysis (<code>read</code>, <code>profile</code>, <code>audit_quality</code>, <code>correlations</code>, <code>vif</code>).</li>
+<li><strong><code>omnistats.integrations</code> &amp; <code>omnistats.cli</code> (L4):</strong> Native Pandas (<code>df.scio</code>) and Polars (<code>pl_df.scio</code>) DataFrame accessors, dual-backend statistical plotting (<code>plot_raincloud</code>, <code>.plot()</code>), and the <code>omnistats</code> command-line interface.</li>
 </ol>
 <h2 id="feature-matrix">Feature Matrix</h2>
 <table>
@@ -693,7 +693,7 @@
 <tr>
 <th style="text-align: left;">Capability</th>
 <th style="text-align: left;">High-Level API (<code>sc.*</code> / <code>df.scio.*</code>)</th>
-<th style="text-align: left;">Stateless Kernel (<code>pyscio.functional as F</code>)</th>
+<th style="text-align: left;">Stateless Kernel (<code>omnistats.functional as F</code>)</th>
 </tr>
 </thead>
 <tbody>
@@ -720,7 +720,7 @@
 <tr>
 <td style="text-align: left;"><strong>Factorial ANOVA / ANCOVA</strong></td>
 <td style="text-align: left;"><code>sc.anova_table(df, "y ~ C(A) * C(B)", typ=2)</code></td>
-<td style="text-align: left;"><code>pyscio.models.anova_table</code> (Type II &amp; Type III SS)</td>
+<td style="text-align: left;"><code>omnistats.models.anova_table</code> (Type II &amp; Type III SS)</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Linear, GLM, &amp; Mixed Models</strong></td>
@@ -770,7 +770,7 @@
 <tr>
 <td style="text-align: left;"><strong>Visualization &amp; Polars</strong></td>
 <td style="text-align: left;"><code>result.plot()</code>, <code>sc.plot_raincloud</code>, <code>pl_df.scio</code></td>
-<td style="text-align: left;"><code>pyscio[plot]</code> (<code>matplotlib</code> + <code>SVGFigure</code>), <code>pyscio[polars]</code></td>
+<td style="text-align: left;"><code>omnistats[plot]</code> (<code>matplotlib</code> + <code>SVGFigure</code>), <code>omnistats[polars]</code></td>
 </tr>
 </tbody>
 </table>

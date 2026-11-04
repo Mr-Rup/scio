@@ -27,7 +27,7 @@
     
     
       
-        <title>Mathematical Rigor & Guards - pyscio</title>
+        <title>Mathematical Rigor & Guards - omnistats</title>
       
     
     
@@ -96,7 +96,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="pyscio" class="md-header__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-header__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +110,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            pyscio
+            omnistats
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -224,13 +224,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="pyscio" class="md-nav__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-nav__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    pyscio
+    omnistats
   </label>
   
     <div class="md-nav__source">
@@ -703,7 +703,7 @@
 <h1 id="mathematical-rigor-statistical-guards">Mathematical Rigor &amp; Statistical Guards</h1>
 <h2 id="1-distributional-pathology-guards-large-n-clt">1. Distributional Pathology Guards &amp; Large-<span class="arithmatex">\(N\)</span> CLT</h2>
 <p>For large sample sizes (<span class="arithmatex">\(N \ge 500\)</span>), formal normality tests (Shapiro-Wilk, D'Agostino-Pearson <span class="arithmatex">\(K^2\)</span>) reject normality for negligible deviations. However, naive moment-based Central Limit Theorem (CLT) overrides (<span class="arithmatex">\(|\gamma_1| &lt; 1.0 \land |\gamma_2| &lt; 2.0\)</span>) can be fooled by symmetric heavy-tailed, zero-inflated, or bimodal distributions.</p>
-<p><code>pyscio</code> enforces a 3-stage pathology screen (<code>F.check_pathology</code>) before permitting a CLT override:</p>
+<p><code>omnistats</code> enforces a 3-stage pathology screen (<code>F.check_pathology</code>) before permitting a CLT override:</p>
 <ol>
 <li><strong>Point-Mass / Zero-Inflation Guard:</strong> Rejects parametric routing if the maximum single-value tie proportion <span class="arithmatex">\(\max_v \frac{\#\{x_i = v\}}{n} \ge 0.30\)</span>.</li>
 <li><strong>Heavy-Tailed / Cauchy Scale Guard:</strong> Compares sample standard deviation against the Gaussian-calibrated interquartile scale:
@@ -714,7 +714,7 @@
    If <span class="arithmatex">\(BC &gt; 0.555\)</span> alongside platykurtic excess kurtosis (<span class="arithmatex">\(\gamma_2 &lt; -0.5\)</span>), the distribution is flagged as bimodal/multimodal and routed to non-parametric inference.</li>
 </ol>
 <h2 id="2-exact-non-central-t-confidence-intervals-for-effect-sizes">2. Exact Non-Central <span class="arithmatex">\(t\)</span> Confidence Intervals for Effect Sizes</h2>
-<p>Rather than relying on symmetric normal approximations for Cohen's <span class="arithmatex">\(d\)</span> and Hedges' <span class="arithmatex">\(g\)</span>, <code>pyscio</code> inverts the cumulative distribution function of the Non-Central <span class="arithmatex">\(t\)</span>-distribution (<span class="arithmatex">\(F_{t,\nu}(\cdot; \lambda)\)</span>) via Brent's root-finding method (<code>scipy.optimize.brentq</code>):</p>
+<p>Rather than relying on symmetric normal approximations for Cohen's <span class="arithmatex">\(d\)</span> and Hedges' <span class="arithmatex">\(g\)</span>, <code>omnistats</code> inverts the cumulative distribution function of the Non-Central <span class="arithmatex">\(t\)</span>-distribution (<span class="arithmatex">\(F_{t,\nu}(\cdot; \lambda)\)</span>) via Brent's root-finding method (<code>scipy.optimize.brentq</code>):</p>
 <div class="arithmatex">\[F_{t,\nu}(t_{\text{obs}}; \lambda_L) = 1 - \frac{\alpha}{2}, \qquad F_{t,\nu}(t_{\text{obs}}; \lambda_U) = \frac{\alpha}{2}\]</div>
 <p>where <span class="arithmatex">\(\lambda = d \sqrt{\frac{n_1 n_2}{n_1 + n_2}}\)</span> for independent two-sample designs.</p>
 <h2 id="3-mackinnon-white-hc3-robust-covariance">3. MacKinnon-White HC3 Robust Covariance</h2>

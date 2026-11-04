@@ -27,7 +27,7 @@
     
     
       
-        <title>Quickstart - pyscio</title>
+        <title>Quickstart - omnistats</title>
       
     
     
@@ -96,7 +96,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="pyscio" class="md-header__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-header__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +110,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            pyscio
+            omnistats
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -224,13 +224,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="pyscio" class="md-nav__button md-logo" aria-label="pyscio" data-md-component="logo">
+    <a href="../.." title="omnistats" class="md-nav__button md-logo" aria-label="omnistats" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    pyscio
+    omnistats
   </label>
   
     <div class="md-nav__source">
@@ -439,10 +439,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-stateless-functional-kernels-pysciofunctional-as-f" class="md-nav__link">
+  <a href="#4-stateless-functional-kernels-omnistatsfunctional-as-f" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Stateless Functional Kernels (pyscio.functional as F)
+        4. Stateless Functional Kernels (omnistats.functional as F)
       
     </span>
   </a>
@@ -714,10 +714,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-stateless-functional-kernels-pysciofunctional-as-f" class="md-nav__link">
+  <a href="#4-stateless-functional-kernels-omnistatsfunctional-as-f" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Stateless Functional Kernels (pyscio.functional as F)
+        4. Stateless Functional Kernels (omnistats.functional as F)
       
     </span>
   </a>
@@ -746,12 +746,12 @@
 
 <h1 id="quickstart-guide">Quickstart Guide</h1>
 <h2 id="installation">Installation</h2>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>pyscio
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>omnistats
 <span class="c1"># or</span>
-pip<span class="w"> </span>install<span class="w"> </span>pyscio
+pip<span class="w"> </span>install<span class="w"> </span>omnistats
 </code></pre></div>
 <h2 id="1-one-tap-exploratory-data-analysis">1. One-Tap Exploratory Data Analysis</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pyscio</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">omnistats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sc</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">"clinical_trial.csv"</span><span class="p">)</span>
 <span class="n">eda_report</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">scio</span><span class="o">.</span><span class="n">eda</span><span class="p">()</span>
@@ -775,8 +775,8 @@ pip<span class="w"> </span>install<span class="w"> </span>pyscio
 <span class="n">log_res</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">logistic</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">"remission ~ age + C(treatment_arm)"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">log_res</span><span class="o">.</span><span class="n">to_df</span><span class="p">())</span>
 </code></pre></div>
-<h2 id="4-stateless-functional-kernels-pysciofunctional-as-f">4. Stateless Functional Kernels (<code>pyscio.functional as F</code>)</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pyscio.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<h2 id="4-stateless-functional-kernels-omnistatsfunctional-as-f">4. Stateless Functional Kernels (<code>omnistats.functional as F</code>)</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">omnistats.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
 
 <span class="c1"># Welch's t-test returning a 6-field TTestResult NamedTuple</span>
 <span class="n">t_res</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">welch_t</span><span class="p">(</span><span class="n">group_a</span><span class="p">,</span> <span class="n">group_b</span><span class="p">)</span>
