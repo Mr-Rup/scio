@@ -44,6 +44,18 @@ class ScioAccessor:
 
         return logistic(self._obj, formula=formula, **kwargs)
 
+    def poisson(self, formula: str, **kwargs: Any) -> Any:
+        """Fit Poisson log-linear GLM via IRLS with QMLE HC3 sandwich standard errors."""
+        from pyscio.models import poisson
+
+        return poisson(self._obj, formula=formula, **kwargs)
+
+    def anova_table(self, formula: str, **kwargs: Any) -> Any:
+        """Compute Type II or Type III Factorial ANOVA / ANCOVA table."""
+        from pyscio.models import anova_table
+
+        return anova_table(self._obj, formula=formula, **kwargs)
+
 
 def register_accessor() -> None:
     """Register the `scio` accessor on pandas.DataFrame if pandas is available."""

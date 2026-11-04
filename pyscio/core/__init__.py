@@ -49,6 +49,7 @@ from pyscio.core.roles import Role, classify, classify_series
 from pyscio.core.types import (
     Alternative,
     ANOVAResult,
+    BayesFactorResult,
     ChiSqResult,
     CorrelationResult,
     FisherResult,
@@ -56,6 +57,7 @@ from pyscio.core.types import (
     NonParametricResult,
     NormalityResult,
     OddsRatioResult,
+    RMAnovaResult,
     TOSTResult,
     TTestResult,
 )
@@ -64,7 +66,6 @@ __all__ = [
     "CLT_MAX_KURT",
     "CLT_MAX_SKEW",
     "CLT_MIN_N",
-    # Constants & guards
     "EPSILON",
     "LOW_POWER_THRESHOLD",
     "PATHOLOGY_BIMODALITY_MAX",
@@ -73,13 +74,11 @@ __all__ = [
     "PATHOLOGY_TIE_THRESHOLD",
     "SMALL_SAMPLE_HEDGES_N",
     "ANOVAResult",
-    # Types
     "Alternative",
     "AssumptionError",
     "AssumptionWarning",
-    # Base and exceptions
     "BaseResult",
-    # Results
+    "BayesFactorResult",
     "CheckResult",
     "ChiSqResult",
     "ColProfile",
@@ -94,8 +93,8 @@ __all__ = [
     "NonParametricResult",
     "NormalityResult",
     "OddsRatioResult",
+    "RMAnovaResult",
     "RegressionResult",
-    # Roles
     "Role",
     "SampleSizeError",
     "ScioError",

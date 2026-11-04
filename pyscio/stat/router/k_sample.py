@@ -1,4 +1,4 @@
-"""Autonomous router for K-group (ANOVA / Welch / Kruskal-Wallis / Friedman) and 2D contingency tables."""
+"""Autonomous router for K-group (ANOVA / Welch / Kruskal / RM-ANOVA / Friedman) and 2D contingency tables."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ from pyscio.functional.effects import (
     odds_ratio,
 )
 from pyscio.functional.posthoc import dunn, games_howell, tukey
+from pyscio.functional.rm import rm_anova
 from pyscio.functional.tests import anova, chisq, fisher, friedman, kruskal, welch_anova
 from pyscio.stat.router.normality import evaluate_normality_with_clt
 
@@ -133,7 +134,7 @@ def route_paired_k_sample(
     y_name: str = "target",
     alpha: float = 0.05,
 ) -> TestResult:
-    """Route K >= 3 repeated-measures conditions via Friedman's test and Kendall's W."""
+    """Route K >= 3 repeated-measures conditions via RM-ANOVA (Greenhouse-Geisser) or Friedman's test."""
     cleaned = [clean_1d(g, name=f"condition_{i}") for i, g in enumerate(groups)]
     k = len(cleaned)
     if k < 3:
@@ -150,31 +151,65 @@ def route_paired_k_sample(
         else [f"Condition_{i + 1}" for i in range(k)]
     )
 
-    f_res = friedman(*cleaned)
-    stat_val = f_res.stat
-    p_val, p_display = clamp_p(f_res.p)
-    eff_val = kendalls_w(*cleaned)
-    magnitude = interpret_effect("cram", eff_val)
-    posthoc_df = (
-        dunn(*cleaned, names=names, p_adjust="fdr_bh", alpha=alpha) if p_val < alpha else None
-    )
+    checks: list[CheckResult] = []
+    all_normal = True
+    for i, arr in enumerate(cleaned):
+        norm, chk = evaluate_normality_with_clt(arr, name=names[i], alpha=alpha)
+        checks.append(chk)
+        if not norm:
+            all_normal = False
+
+    if all_normal:
+        rm_res = rm_anova(*cleaned)
+        checks.append(
+            CheckResult(
+                name="Sphericity (Greenhouse-Geisser ε)",
+                stat=rm_res.eps_gg,
+                p=rm_res.p_gg,
+                passed=rm_res.eps_gg >= 0.75,
+                details=f"ε_GG={rm_res.eps_gg:.3f} (df adjusted: {rm_res.eps_gg * rm_res.df_num:.2f}, {rm_res.eps_gg * rm_res.df_den:.2f})",
+            )
+        )
+        stat_val = rm_res.stat
+        p_val, p_display = clamp_p(rm_res.p_gg)
+        dof: float | tuple[float, ...] = (
+            round(rm_res.eps_gg * rm_res.df_num, 2),
+            round(rm_res.eps_gg * rm_res.df_den, 2),
+        )
+        eff_val = rm_res.partial_eta_sq
+        metric = "Partial Eta-squared (η²_p)"
+        magnitude = interpret_effect("eta", eff_val)
+        test_name = "One-Way Repeated-Measures ANOVA (Greenhouse-Geisser)"
+        posthoc_df = games_howell(*cleaned, names=names, alpha=alpha) if p_val < alpha else None
+    else:
+        f_res = friedman(*cleaned)
+        stat_val = f_res.stat
+        p_val, p_display = clamp_p(f_res.p)
+        dof = float(k - 1)
+        eff_val = kendalls_w(*cleaned)
+        metric = "Kendall's W"
+        magnitude = interpret_effect("cram", eff_val)
+        test_name = "Friedman Repeated-Measures Test"
+        posthoc_df = (
+            dunn(*cleaned, names=names, p_adjust="fdr_bh", alpha=alpha) if p_val < alpha else None
+        )
 
     return TestResult(
-        test_name="Friedman Repeated-Measures Test",
+        test_name=test_name,
         x_name=x_name,
         y_name=y_name,
         stat=stat_val,
         p=p_val,
         p_display=p_display,
-        dof=float(k - 1),
+        dof=dof,
         ci=None,
         ci_level=1.0 - alpha,
         sig=p_val < alpha,
         alpha=alpha,
         effect=eff_val,
-        metric="Kendall's W",
+        metric=metric,
         magnitude=magnitude,
-        checks=[],
+        checks=checks,
         posthoc=posthoc_df,
         warns=[],
     )

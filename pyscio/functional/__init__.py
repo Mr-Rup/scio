@@ -10,7 +10,7 @@ Canonical usage:
 
 from __future__ import annotations
 
-from pyscio.core.types import CorrelationResult, TOSTResult
+from pyscio.core.types import BayesFactorResult, CorrelationResult, RMAnovaResult, TOSTResult
 from pyscio.functional.adjust import (
     bonferroni,
     fdr_bh,
@@ -19,6 +19,7 @@ from pyscio.functional.adjust import (
     power_t,
     solve_power_t,
 )
+from pyscio.functional.bayes import bayes_factor_t, interpret_bf
 from pyscio.functional.checks import (
     HomoscedasticityResult,
     NormalityResult,
@@ -63,6 +64,7 @@ from pyscio.functional.resample import (
     permutation_test,
     tost,
 )
+from pyscio.functional.rm import rm_anova
 from pyscio.functional.robust import (
     huber_location,
     trimmed_mean,
@@ -93,6 +95,7 @@ from pyscio.functional.tests import (
 
 __all__ = [
     "ANOVAResult",
+    "BayesFactorResult",
     "ChiSqResult",
     "CorrelationResult",
     "FisherResult",
@@ -100,10 +103,12 @@ __all__ = [
     "NonParametricResult",
     "NormalityResult",
     "OddsRatioResult",
+    "RMAnovaResult",
     "TOSTResult",
     "TTestResult",
     "anova",
     "bartlett",
+    "bayes_factor_t",
     "bonferroni",
     "bootstrap_ci",
     "check_normality",
@@ -126,6 +131,7 @@ __all__ = [
     "hedges_g_ci",
     "holm",
     "huber_location",
+    "interpret_bf",
     "interpret_effect",
     "iqr_bounds",
     "kendall_tau",
@@ -143,6 +149,7 @@ __all__ = [
     "power_anova",
     "power_t",
     "rank_biserial",
+    "rm_anova",
     "sarle_bimodality",
     "shapiro",
     "solve_power_t",

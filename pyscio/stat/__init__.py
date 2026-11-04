@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pyscio.models import logistic, ols, parse_formula
+from pyscio.models import anova_table, logistic, ols, parse_formula, poisson
 from pyscio.stat.compare import compare
 from pyscio.stat.equivalence import tost
 from pyscio.stat.power import power_anova, power_t, solve_power, solve_power_t
@@ -19,11 +19,13 @@ from pyscio.stat.router import (
 from pyscio.stat.screen import screen
 
 __all__ = [
+    "anova_table",
     "compare",
     "evaluate_normality_with_clt",
     "logistic",
     "ols",
     "parse_formula",
+    "poisson",
     "power_anova",
     "power_t",
     "route_contingency",

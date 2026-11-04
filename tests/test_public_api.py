@@ -23,6 +23,8 @@ def test_top_level_public_api() -> None:
         "screen",
         "ols",
         "logistic",
+        "poisson",
+        "anova_table",
         "tost",
         "solve_power",
     }
@@ -55,6 +57,8 @@ def test_core_public_api() -> None:
         "ColProfile",
         "EDAReport",
         "ScreenReport",
+        "RMAnovaResult",
+        "BayesFactorResult",
     }
     assert expected.issubset(set(core.__all__))
     for name in expected:
@@ -69,8 +73,10 @@ def test_functional_public_api() -> None:
         "one_sample_t",
         "anova",
         "welch_anova",
+        "rm_anova",
         "TTestResult",
         "ANOVAResult",
+        "RMAnovaResult",
         "mann_whitney",
         "wilcoxon",
         "kruskal",
@@ -112,6 +118,9 @@ def test_functional_public_api() -> None:
         "spearman_r",
         "kendall_tau",
         "partial_corr",
+        "bayes_factor_t",
+        "interpret_bf",
+        "BayesFactorResult",
         "permutation_test",
         "bootstrap_ci",
         "tost",
@@ -138,6 +147,8 @@ def test_stat_and_eda_public_api() -> None:
         "screen",
         "ols",
         "logistic",
+        "poisson",
+        "anova_table",
         "parse_formula",
         "power_t",
         "power_anova",
@@ -175,5 +186,5 @@ def test_stat_and_eda_public_api() -> None:
 
 def test_dataframe_accessor_methods() -> None:
     df = pd.DataFrame({"a": [1.0, 2.0, 3.0], "b": ["x", "y", "x"]})
-    for method in ("eda", "compare", "screen", "ols", "logistic"):
+    for method in ("eda", "compare", "screen", "ols", "logistic", "poisson", "anova_table"):
         assert hasattr(df.scio, method), f"Missing df.scio.{method}"

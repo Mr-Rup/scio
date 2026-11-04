@@ -16,7 +16,16 @@ from pyscio.accessor import register_accessor
 if TYPE_CHECKING:
     from pyscio import core, eda, functional, models, stat
     from pyscio.eda import read
-    from pyscio.stat import compare, logistic, ols, screen, solve_power, tost
+    from pyscio.stat import (
+        anova_table,
+        compare,
+        logistic,
+        ols,
+        poisson,
+        screen,
+        solve_power,
+        tost,
+    )
 
     F = functional
 
@@ -31,6 +40,7 @@ register_accessor()
 __all__ = [
     "F",
     "__version__",
+    "anova_table",
     "compare",
     "core",
     "eda",
@@ -38,6 +48,7 @@ __all__ = [
     "logistic",
     "models",
     "ols",
+    "poisson",
     "read",
     "screen",
     "solve_power",
@@ -61,7 +72,16 @@ def __getattr__(name: str) -> Any:
         val = eda_mod.read
         globals()[name] = val
         return val
-    if name in ("compare", "screen", "ols", "logistic", "tost", "solve_power"):
+    if name in (
+        "anova_table",
+        "compare",
+        "screen",
+        "ols",
+        "logistic",
+        "poisson",
+        "tost",
+        "solve_power",
+    ):
         stat_mod = importlib.import_module("pyscio.stat")
         val = getattr(stat_mod, name)
         globals()[name] = val

@@ -27,6 +27,18 @@ class ANOVAResult(NamedTuple):
     df_within: float
 
 
+class RMAnovaResult(NamedTuple):
+    """Lightweight return tuple for One-Way Repeated-Measures ANOVA with Greenhouse-Geisser correction."""
+
+    stat: float
+    p: float
+    p_gg: float
+    eps_gg: float
+    df_num: float
+    df_den: float
+    partial_eta_sq: float
+
+
 class NonParametricResult(NamedTuple):
     """Lightweight return tuple for Mann-Whitney U, Wilcoxon, Kruskal-Wallis, and Permutation tests."""
 
@@ -91,7 +103,7 @@ class TOSTResult(NamedTuple):
 
 
 class CorrelationResult(NamedTuple):
-    """Lightweight return tuple for Pearson and Spearman correlation kernels with CI."""
+    """Lightweight return tuple for Pearson, Spearman, Kendall, and Partial correlation kernels."""
 
     r: float
     stat: float
@@ -99,3 +111,14 @@ class CorrelationResult(NamedTuple):
     dof: float
     ci: tuple[float, float]
     method: str
+
+
+class BayesFactorResult(NamedTuple):
+    """Lightweight return tuple for Rouder's JZS Bayes Factor t-test."""
+
+    bf10: float
+    bf01: float
+    t_stat: float
+    dof: float
+    r_scale: float
+    evidence: str
