@@ -62,6 +62,24 @@ class ScioAccessor:
 
         return mixedlm(self._obj, formula=formula, **kwargs)
 
+    def coxph(self, formula: str, **kwargs: Any) -> Any:
+        """Fit a Cox Proportional Hazards model via Breslow partial likelihood."""
+        from pyscio.models import coxph
+
+        return coxph(self._obj, formula=formula, **kwargs)
+
+    def ate(self, outcome: str, treatment: str, covariates: list[str], **kwargs: Any) -> Any:
+        """Estimate causal Average Treatment Effect (ATE) via Doubly Robust AIPW or IPTW."""
+        from pyscio.models import ate
+
+        return ate(self._obj, outcome=outcome, treatment=treatment, covariates=covariates, **kwargs)
+
+    def covariate_balance(self, treatment: str, covariates: list[str], **kwargs: Any) -> Any:
+        """Compute unweighted and propensity-weighted Standardized Mean Differences (SMD)."""
+        from pyscio.models import covariate_balance
+
+        return covariate_balance(self._obj, treatment=treatment, covariates=covariates, **kwargs)
+
     def plot_raincloud(self, x: str, y: str, **kwargs: Any) -> Any:
         """Render a Raincloud distribution plot comparing `y` across `x`."""
         from pyscio.integrations.plotting import plot_raincloud

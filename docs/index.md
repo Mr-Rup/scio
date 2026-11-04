@@ -21,7 +21,10 @@
 | **K-Group Omnibus & Post-Hoc** | Auto-triggers Tukey, Games-Howell, or Dunn | `F.anova`, `F.welch_anova`, `F.kruskal`, `F.tukey`, `F.games_howell`, `F.dunn` |
 | **Repeated Measures & Paired** | `sc.compare(df, x="cond", y="val", paired=True)` | `F.rm_anova` (Greenhouse-Geisser), `F.friedman`, `F.kendalls_w`, `F.mcnemar` |
 | **Factorial ANOVA / ANCOVA** | `sc.anova_table(df, "y ~ C(A) * C(B)", typ=2)` | `pyscio.models.anova_table` (Type II & Type III SS) |
-| **Linear, GLM, & Mixed Models** | `sc.ols`, `sc.logistic`, `sc.poisson`, `sc.mixedlm` | QR HC0–HC3 OLS, IRLS Logistic/Poisson, Profiled REML LMM |
+| **Linear, GLM, & Mixed Models** | `sc.ols`, `sc.logistic`, `sc.poisson`, `sc.mixedlm` | QR HC0–HC3 & Newey-West HAC OLS, IRLS Logistic/Poisson, Profiled REML LMM |
+| **Survival Analysis** | `sc.coxph(df, "Surv(time, event) ~ x1 + x2")` | `F.kaplan_meier` (Greenwood log-log CI), `F.logrank_test`, Harrell's $C$-index |
+| **Causal Inference** | `sc.ate(df, y, treat, covars)`, `sc.covariate_balance` | Doubly Robust AIPW, Hajek IPTW, Standardized Mean Difference (SMD) |
+| **Time-Series Diagnostics** | `sc.ols(df, "y ~ x", robust_se="HAC")` | `F.adf_test` (Unit Root), `F.ljung_box` ($Q$-test), `F.durbin_watson` |
 | **Effect Sizes & Exact CIs** | Populates `.effect` and `.effect_ci` | `F.cohen_d_ci`, `F.hedges_g_ci`, `F.cliffs_d_ci`, `F.eta_sq`, `F.omega_sq` |
 | **Correlation & Partial Corr** | `sc.compare(df, x="num1", y="num2")` | `F.pearson_r`, `F.spearman_r`, `F.kendall_tau`, `F.partial_corr` |
 | **Bayesian & Power Analysis** | `sc.solve_power(effect=0.5, power=0.8)` | `F.bayes_factor_t` (JZS $BF_{10}$), `F.interpret_bf`, `F.solve_power_t` |

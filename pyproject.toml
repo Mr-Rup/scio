@@ -106,7 +106,7 @@ pyscio = "pyscio.cli.app:main"
 
 [tool.hatch.version]
 source = "vcs"
-fallback-version = "0.2.0"
+fallback-version = "0.3.0"
 
 [tool.hatch.build.targets.sdist]
 exclude = [

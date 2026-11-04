@@ -2,7 +2,17 @@
 
 from __future__ import annotations
 
-from pyscio.models import anova_table, logistic, mixedlm, ols, parse_formula, poisson
+from pyscio.models import (
+    anova_table,
+    ate,
+    covariate_balance,
+    coxph,
+    logistic,
+    mixedlm,
+    ols,
+    parse_formula,
+    poisson,
+)
 from pyscio.stat.compare import compare
 from pyscio.stat.equivalence import tost
 from pyscio.stat.power import power_anova, power_t, solve_power, solve_power_t
@@ -20,7 +30,10 @@ from pyscio.stat.screen import screen
 
 __all__ = [
     "anova_table",
+    "ate",
     "compare",
+    "covariate_balance",
+    "coxph",
     "evaluate_normality_with_clt",
     "logistic",
     "mixedlm",

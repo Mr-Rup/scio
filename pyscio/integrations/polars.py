@@ -65,6 +65,20 @@ class PolarsScioNamespace:
 
         return mixedlm(self.to_pandas(), formula=formula, **kwargs)
 
+    def coxph(self, formula: str, **kwargs: Any) -> Any:
+        """Fit a Cox Proportional Hazards model via Breslow partial likelihood."""
+        from pyscio.models import coxph
+
+        return coxph(self.to_pandas(), formula=formula, **kwargs)
+
+    def ate(self, outcome: str, treatment: str, covariates: list[str], **kwargs: Any) -> Any:
+        """Estimate causal Average Treatment Effect (ATE) via Doubly Robust AIPW or IPTW."""
+        from pyscio.models import ate
+
+        return ate(
+            self.to_pandas(), outcome=outcome, treatment=treatment, covariates=covariates, **kwargs
+        )
+
 
 def register_polars_namespace() -> None:
     """Register the `scio` namespace on `polars.DataFrame` if Polars is installed."""
@@ -82,4 +96,3 @@ __all__ = [
     "is_dataframe_like",
     "register_polars_namespace",
 ]
-

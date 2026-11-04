@@ -10,7 +10,15 @@ Canonical usage:
 
 from __future__ import annotations
 
-from pyscio.core.types import BayesFactorResult, CorrelationResult, RMAnovaResult, TOSTResult
+from pyscio.core.types import (
+    BayesFactorResult,
+    CorrelationResult,
+    LogRankResult,
+    RMAnovaResult,
+    StationarityResult,
+    SurvivalCurveResult,
+    TOSTResult,
+)
 from pyscio.functional.adjust import (
     bonferroni,
     fdr_bh,
@@ -72,6 +80,7 @@ from pyscio.functional.robust import (
     winsorized_var,
     yuen_t,
 )
+from pyscio.functional.survival import kaplan_meier, logrank_test
 from pyscio.functional.tests import (
     ANOVAResult,
     ChiSqResult,
@@ -92,6 +101,7 @@ from pyscio.functional.tests import (
     welch_t,
     wilcoxon,
 )
+from pyscio.functional.timeseries import adf_test, durbin_watson, ljung_box
 
 __all__ = [
     "ANOVAResult",
@@ -100,12 +110,16 @@ __all__ = [
     "CorrelationResult",
     "FisherResult",
     "HomoscedasticityResult",
+    "LogRankResult",
     "NonParametricResult",
     "NormalityResult",
     "OddsRatioResult",
     "RMAnovaResult",
+    "StationarityResult",
+    "SurvivalCurveResult",
     "TOSTResult",
     "TTestResult",
+    "adf_test",
     "anova",
     "bartlett",
     "bayes_factor_t",
@@ -121,6 +135,7 @@ __all__ = [
     "cramers_v",
     "dagostino",
     "dunn",
+    "durbin_watson",
     "eps_sq",
     "eta_sq",
     "fdr_bh",
@@ -134,10 +149,13 @@ __all__ = [
     "interpret_bf",
     "interpret_effect",
     "iqr_bounds",
+    "kaplan_meier",
     "kendall_tau",
     "kendalls_w",
     "kruskal",
     "levene",
+    "ljung_box",
+    "logrank_test",
     "mann_whitney",
     "mcnemar",
     "odds_ratio",

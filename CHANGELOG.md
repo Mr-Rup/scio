@@ -5,6 +5,21 @@ All notable changes to **`pyscio`** are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-04
+
+### Added
+- **Survival & Time-to-Event Analysis (S1 — `F.kaplan_meier`, `F.logrank_test`, `sc.coxph`):**
+  - Kaplan-Meier product-limit survival estimator (`F.kaplan_meier`) with Greenwood variance, Kalbfleisch-Prentice $[0, 1]$ log-log confidence intervals, and median survival time.
+  - Mantel-Cox Log-Rank test (`F.logrank_test`) for right-censored survival comparisons with Mantel-Haenszel Hazard Ratios.
+  - Cox Proportional Hazards regression (`sc.coxph(df, "Surv(time, event) ~ x1 + x2")`, `df.scio.coxph`, and automatic `sc.compare(df, "Surv(time, event) ~ ...")` routing) via Breslow partial likelihood Newton-Raphson with Hazard Ratios ($\text{HR} = \exp(\beta)$) and Harrell's Concordance Index ($C$-statistic).
+- **Causal Inference & Propensity Adjustment (S2 — `sc.ate`, `sc.covariate_balance`):**
+  - Robins-Rotnitzky-Zhao **Doubly Robust Augmented Inverse Probability Weighting (`sc.ate(method="aipw")`)** and **Hajek IPTW (`sc.ate(method="iptw")`)** with semiparametric influence-function standard errors and positivity overlap guards.
+  - Standardized Mean Difference covariate balance auditing (`sc.covariate_balance`, `df.scio.covariate_balance`) comparing unweighted vs. propensity-weighted $|\text{SMD}| < 0.10$.
+- **Time-Series Stationarity, Autocorrelation, & HAC Standard Errors (S3 — `F.adf_test`, `F.ljung_box`, `F.durbin_watson`, `sc.ols(robust_se="HAC")`):**
+  - Augmented Dickey-Fuller (`F.adf_test`) unit-root test with Schwert lag selection and MacKinnon response-surface $p$-values.
+  - Ljung-Box portmanteau serial autocorrelation test (`F.ljung_box`) and Durbin-Watson residual autocorrelation statistic (`F.durbin_watson`).
+  - Newey-West Heteroscedasticity and Autocorrelation Consistent (**HAC**) Bartlett-kernel covariance estimator in `sc.ols(..., robust_se="HAC", hac_lags=...)`.
+
 ## [0.2.0] - 2026-11-04
 
 ### Added

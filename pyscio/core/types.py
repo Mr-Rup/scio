@@ -122,3 +122,37 @@ class BayesFactorResult(NamedTuple):
     dof: float
     r_scale: float
     evidence: str
+
+
+class SurvivalCurveResult(NamedTuple):
+    """Lightweight return tuple for Kaplan-Meier product-limit survival curve estimation."""
+
+    times: tuple[float, ...]
+    survival_prob: tuple[float, ...]
+    ci_low: tuple[float, ...]
+    ci_high: tuple[float, ...]
+    n_at_risk: tuple[int, ...]
+    n_events: tuple[int, ...]
+    median_survival: float
+
+
+class LogRankResult(NamedTuple):
+    """Lightweight return tuple for Mantel-Cox Log-Rank survival comparison."""
+
+    stat: float
+    p: float
+    dof: int
+    observed: tuple[float, ...]
+    expected: tuple[float, ...]
+    hazard_ratio: float
+
+
+class StationarityResult(NamedTuple):
+    """Lightweight return tuple for Time-Series ADF stationarity and Ljung-Box autocorrelation tests."""
+
+    stat: float
+    p: float
+    lags: int
+    n_obs: int
+    is_stationary: bool
+    method: str

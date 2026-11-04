@@ -13,7 +13,7 @@ from pyscio.core.errors import MissingDataError, StatError
 from pyscio.core.results import TestResult
 from pyscio.core.roles import Role, classify_series
 from pyscio.functional.effects import interpret_effect
-from pyscio.models import _clean_var_name, extract_formula_vars, logistic, mixedlm, ols
+from pyscio.models import _clean_var_name, coxph, extract_formula_vars, logistic, mixedlm, ols
 from pyscio.stat.router import (
     route_contingency,
     route_correlation,
@@ -58,6 +58,28 @@ def compare(
             formula if formula is not None else (x if isinstance(x, str) and "~" in x else None)
         )
         if active_formula is not None:
+            if active_formula.strip().startswith("Surv("):
+                cox_res = coxph(df, active_formula, alpha=alpha)
+                return TestResult(
+                    test_name=cox_res.model_type,
+                    x_name=cox_res.formula.split("~", 1)[1].strip(),
+                    y_name=cox_res.y_name,
+                    stat=cox_res.stat,
+                    p=cox_res.p,
+                    p_display=cox_res.p_display,
+                    dof=float(cox_res.df_model),
+                    ci=None,
+                    ci_level=1.0 - alpha,
+                    sig=cox_res.p < alpha,
+                    alpha=alpha,
+                    effect=cox_res.r_squared,
+                    effect_ci=None,
+                    metric="Harrell's C-index",
+                    magnitude=interpret_effect("cohen", cox_res.r_squared),
+                    checks=[],
+                    posthoc=cox_res.coef_df,
+                    warns=cox_res.warns,
+                )
             if "|" in active_formula:
                 reg_res = mixedlm(df, active_formula, alpha=alpha)
                 return TestResult(

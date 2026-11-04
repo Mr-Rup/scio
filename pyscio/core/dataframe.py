@@ -66,4 +66,3 @@ def ensure_pandas_df(data: Any) -> pd.DataFrame:
         f"Expected a DataFrame-compatible object (pandas.DataFrame, polars.DataFrame, "
         f"pyarrow.Table, or dict), got {type(data).__name__}."
     )
-

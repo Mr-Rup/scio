@@ -19,7 +19,10 @@ if TYPE_CHECKING:
     from pyscio.integrations.plotting import plot_raincloud
     from pyscio.stat import (
         anova_table,
+        ate,
         compare,
+        covariate_balance,
+        coxph,
         logistic,
         mixedlm,
         ols,
@@ -34,7 +37,7 @@ if TYPE_CHECKING:
 try:
     __version__ = version("pyscio")
 except PackageNotFoundError:
-    __version__ = "0.2.0"
+    __version__ = "0.3.0"
 
 # Register the DataFrame accessor: df.scio
 register_accessor()
@@ -43,8 +46,11 @@ __all__ = [
     "F",
     "__version__",
     "anova_table",
+    "ate",
     "compare",
     "core",
+    "covariate_balance",
+    "coxph",
     "eda",
     "functional",
     "integrations",
@@ -84,7 +90,10 @@ def __getattr__(name: str) -> Any:
         return val
     if name in (
         "anova_table",
+        "ate",
         "compare",
+        "covariate_balance",
+        "coxph",
         "screen",
         "ols",
         "logistic",

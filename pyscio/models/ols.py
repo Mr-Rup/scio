@@ -19,8 +19,9 @@ def ols(
     formula: str,
     robust_se: str | bool | None = "HC3",
     alpha: float = 0.05,
+    hac_lags: int | None = None,
 ) -> RegressionResult:
-    """Fit Ordinary Least Squares (OLS) regression via QR decomposition with HC0-HC3 robust SEs."""
+    """Fit Ordinary Least Squares (OLS) regression via QR decomposition with HC0-HC3 or Newey-West HAC SEs."""
     y_name, y, term_names, x_mat = parse_formula(df, formula)
     n, p = x_mat.shape
     if n <= p:
@@ -81,6 +82,23 @@ def ols(
         cov_beta = xtx_inv @ meat @ xtx_inv
         model_label = f"OLS Regression ({se_mode} Robust SE)"
         se_label = se_mode
+    elif se_mode in ("HAC", "NEWEY-WEST", "NW"):
+        max_l = (
+            max(1, int(hac_lags))
+            if hac_lags is not None
+            else max(1, int(4.0 * ((n / 100.0) ** (2.0 / 9.0))))
+        )
+        max_l = min(max_l, n - 2)
+        u_mat = x_mat * resid[:, None]
+        meat = u_mat.T @ u_mat
+        for j in range(1, max_l + 1):
+            wj = 1.0 - j / float(max_l + 1)
+            gamma_j = u_mat[j:].T @ u_mat[:-j]
+            meat = meat + wj * (gamma_j + gamma_j.T)
+        meat = (n / df_resid) * meat
+        cov_beta = xtx_inv @ meat @ xtx_inv
+        model_label = f"OLS Regression (Newey-West HAC SE, L={max_l})"
+        se_label = f"HAC(L={max_l})"
     else:
         cov_beta = sigma2 * xtx_inv
         model_label = "OLS Regression (Classical SE)"
