@@ -28,7 +28,7 @@ jobs:
           uv run --with ruff ruff format --check .
 
       - name: Check Module Size & Layer Contracts
-        run: uv run python scripts/check_module_size.py
+        run: uv run python scripts/check_module_size.py --strict
 
   typecheck:
     name: Type Check (mypy --strict)
